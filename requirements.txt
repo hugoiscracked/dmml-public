@@ -1,0 +1,34 @@
+# DMML notebook environment
+#
+# Recommended Python: 3.10, 3.11, or 3.12.
+# Install with:
+#   python -m pip install -r requirements.txt
+#
+# If you want GPU-enabled PyTorch, install torch/torchvision from the official
+# PyTorch selector for your CUDA version, then install the remaining packages.
+
+# Jupyter
+jupyterlab>=4.2
+notebook>=7.2
+ipykernel>=6.29
+ipywidgets>=8.1
+
+# Core scientific Python
+numpy>=1.26
+pandas>=2.2
+matplotlib>=3.8
+seaborn>=0.13
+
+# Classical machine learning and statistics
+scikit-learn>=1.5
+statsmodels>=0.14
+shap>=0.45
+
+# Neural networks and computer vision
+torch>=2.3
+torchvision>=0.18
+
+# HuggingFace datasets and transformers
+datasets>=2.20
+transformers>=4.42
+accelerate>=0.31

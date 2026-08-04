@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DMML — Glossary</title>
+<meta name="description" content="Glossary of terms for the Data Mining & Machine Learning course, with disambiguations of commonly-confused jargon.">
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel-2:#1c2128;
+    --border:#21262d; --border-2:#30363d;
+    --text:#e6edf3; --dim:#8b949e; --gold:#e3b341;
+    --core:#58a6ff; --data:#3fb950; --ts:#f78166; --sup:#2dd4bf;
+    --eval:#e3b341; --tree:#56d364; --unsup:#bc8cff; --dl:#ffa657;
+    --font-sans: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono: ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 1px 1px,#161b22 1px,transparent 0);background-size:26px 26px;
+  }
+  a{color:var(--core);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1120px;margin:0 auto;padding:22px clamp(14px,3vw,32px) 80px}
+
+  .masthead{border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:18px}
+  .topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--core)}
+  .backlink{font-family:var(--font-mono);font-size:12px;color:var(--dim)}
+  .masthead h1{font-size:clamp(24px,3.4vw,34px);margin:.24em 0 .12em;letter-spacing:-.01em}
+  .masthead p{margin:0;color:var(--dim);max-width:75ch;font-size:15px}
+
+  /* Controls */
+  .controls{position:sticky;top:0;z-index:20;background:linear-gradient(var(--bg),var(--bg) 82%,transparent);
+    padding:12px 0 10px;margin-bottom:6px}
+  .controls .inner{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+  #q{background:var(--bg);border:1px solid var(--border-2);border-radius:8px;color:var(--text);
+    font:inherit;font-size:14px;padding:9px 12px;flex:1;min-width:200px}
+  #q:focus-visible{outline:2px solid var(--core);outline-offset:1px;border-color:var(--core)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{--c:var(--dim);display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+    background:var(--bg);border:1px solid var(--border-2);border-radius:999px;color:var(--text);
+    font:inherit;font-size:12px;padding:4px 10px 4px 8px;transition:border-color .15s,opacity .15s}
+  .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+  .chip[aria-pressed="false"]{opacity:.4}
+  .chip[aria-pressed="false"]::before{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+  .chip:hover{border-color:var(--c)}
+  .chip:focus-visible{outline:2px solid var(--c);outline-offset:1px}
+  .count{font-family:var(--font-mono);font-size:12px;color:var(--dim);margin-left:auto}
+
+  section h2{font-size:20px;margin:30px 0 4px;letter-spacing:-.01em}
+  section .sub{color:var(--dim);font-size:14px;margin:0 0 16px}
+
+  /* Disambiguation cards */
+  .confusables{display:grid;gap:14px;grid-template-columns:1fr}
+  @media(min-width:760px){.confusables{grid-template-columns:1fr 1fr}}
+  .dis{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--gold);
+    border-radius:var(--radius);padding:15px 17px}
+  .dis h3{margin:0 0 4px;font-size:16px;letter-spacing:-.01em}
+  .dis .tag{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+  .dis dl{margin:10px 0 0;display:grid;gap:7px}
+  .dis dt{font-weight:700;font-size:14px}
+  .dis dd{margin:0 0 2px;font-size:13.5px;color:#cdd6e0}
+  .dis .bottom{margin-top:11px;padding-top:10px;border-top:1px solid var(--border);
+    font-size:13px;color:var(--dim)}
+  .dis .bottom b{color:var(--gold);font-weight:600}
+
+  /* Alphabet nav */
+  .alpha{position:sticky;top:70px;z-index:15;display:flex;flex-wrap:wrap;gap:3px;margin:6px 0 14px;
+    background:linear-gradient(var(--bg),var(--bg) 70%,transparent);padding:6px 0}
+  .alpha a{font-family:var(--font-mono);font-size:12px;color:var(--dim);border:1px solid var(--border-2);
+    border-radius:6px;padding:3px 7px;min-width:24px;text-align:center}
+  .alpha a:hover{color:var(--text);border-color:var(--dim);text-decoration:none}
+  .alpha a.off{opacity:.3;pointer-events:none}
+
+  .letter{font-family:var(--font-mono);font-size:22px;color:var(--dim);margin:22px 0 8px;
+    border-bottom:1px solid var(--border);padding-bottom:4px}
+  .terms{display:grid;gap:2px}
+  .term{padding:12px 14px;border:1px solid transparent;border-radius:9px;scroll-margin-top:130px}
+  .term:target{border-color:var(--gold);background:var(--panel)}
+  .term .head{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .term .name{font-weight:700;font-size:15.5px}
+  .term .alias{color:var(--dim);font-size:13px;font-style:italic}
+  .term .pill{font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;
+    padding:2px 7px;border-radius:5px;color:#fff;background:color-mix(in srgb,var(--c,#30363d) 26%,#0d1117);
+    border:1px solid color-mix(in srgb,var(--c,#30363d) 60%,transparent);color:var(--c,#8b949e)}
+  .term .wk{font-family:var(--font-mono);font-size:11px;color:var(--dim)}
+  .term .def{margin:5px 0 0;font-size:14.5px;color:#cdd6e0}
+  .term .see{margin-top:5px;font-size:12.5px;color:var(--dim)}
+  .term .see a{color:var(--sup)}
+  .hidden{display:none!important}
+
+  footer{margin-top:40px;color:var(--dim);font-size:12.5px;border-top:1px solid var(--border);padding-top:14px}
+  footer code{font-family:var(--font-mono);color:var(--text)}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="topline">
+      <div class="eyebrow">T-809-DATA · Data Mining &amp; Machine Learning</div>
+      <div class="backlink"><a href="index.html" style="color:var(--dim)">← Skill Tree</a> · <a href="libraries.html" style="color:var(--dim)">Libraries</a> · <a href="ai-tutor.html" style="color:var(--dim)">Using AI →</a></div>
+    </div>
+    <h1>Glossary</h1>
+    <p>The vocabulary of the course in one place — plus a section untangling the terms we
+       (instructors included) reach for interchangeably without thinking. Search, or filter by topic.</p>
+  </header>
+
+  <div class="controls">
+    <div class="inner">
+      <input id="q" type="search" placeholder="Search terms & definitions…" autocomplete="off" aria-label="Search glossary">
+      <div class="chips" id="cats"></div>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+
+  <section id="confusables-section">
+    <h2>Commonly confused</h2>
+    <p class="sub">Terms people use as synonyms that carry real distinctions. Skim these once; they resolve a lot of quiet confusion.</p>
+    <div class="confusables" id="confusables"></div>
+  </section>
+
+  <section id="glossary-section">
+    <h2>A–Z glossary</h2>
+    <p class="sub">~110 terms. Click a <em>see also</em> link to jump; the target highlights.</p>
+    <nav class="alpha" id="alpha" aria-label="Jump to letter"></nav>
+    <div id="glossary"></div>
+  </section>
+
+  <footer>
+    Companion to the <a href="index.html">interactive skill tree</a>. Terms grounded in the course
+    lecture track; definitions are deliberately short — see a textbook (Bishop, <em>Deep Learning</em>) for depth.
+    Add or edit entries in the <code>TERMS</code> / <code>DISAMBIG</code> arrays of this file.
+  </footer>
+</div>
+
+<script>
+const CATS = {
+  core: {label:"Foundations",        color:"#58a6ff"},
+  data: {label:"Data & Features",    color:"#3fb950"},
+  ts:   {label:"Time Series",        color:"#f78166"},
+  sup:  {label:"Supervised Models",  color:"#2dd4bf"},
+  eval: {label:"Evaluation & Tuning",color:"#e3b341"},
+  tree: {label:"Trees & Ensembles",  color:"#56d364"},
+  unsup:{label:"Unsupervised & Dim. Reduction", color:"#bc8cff"},
+  dl:   {label:"Neural & Deep Learning", color:"#ffa657"},
+};
+
+/* ── Commonly-confused clusters ─────────────────────────────────────────── */
+const DISAMBIG = [
+  {t:"Neural network · Feedforward network · MLP · Deep learning", c:"dl", items:[
+    ["Neural network","Umbrella term for any model of connected artificial neurons — includes MLPs, CNNs, RNNs, transformers."],
+    ["Feedforward network","Any neural net where signal flows one way, input → output, with no cycles. MLPs and CNNs are feedforward; RNNs are not."],
+    ["Multilayer perceptron (MLP)","A specific feedforward net made of fully-connected (dense) layers with non-linear activations."],
+    ["Deep learning","The subfield of ML using neural nets with many layers — a field, not a single model."],
+  ], bottom:"Strictly, <b>MLP ⊂ feedforward NN ⊂ neural network</b>. Intro courses often say “neural network” when they mean “MLP.” A CNN is a feedforward network but not an MLP."},
+
+  {t:"Loss · Cost · Objective · Error", c:"core", items:[
+    ["Loss function","The error on a <em>single</em> example (e.g. squared error for one point)."],
+    ["Cost function","The aggregate loss over a batch/dataset — usually the mean loss, sometimes plus a regularization term."],
+    ["Objective function","Whatever the optimizer optimizes (minimize or maximize); the most general term, usually the cost."],
+    ["Error","Informal: a residual, the irreducible noise, or a metric like “test error.” Pin it down by context."],
+  ], bottom:"In practice these are used interchangeably. The pedantic split is <b>per-example (loss) vs aggregate (cost) vs what-is-optimized (objective)</b>."},
+
+  {t:"Parameter · Hyperparameter", c:"core", items:[
+    ["Parameter","A value <em>learned from data</em> during training: weights, coefficients, split thresholds, cluster centroids."],
+    ["Hyperparameter","A value <em>set before</em> training and not adjusted by the fit: learning rate, k in k-NN, max_depth, C, number of trees."],
+  ], bottom:"Rule of thumb: <b>if <code>.fit()</code> changes it, it's a parameter; if you pass it into the constructor, it's a hyperparameter.</b>"},
+
+  {t:"Weights · Parameters · Coefficients", c:"dl", items:[
+    ["Parameters","General term for all learned values in a model."],
+    ["Weights","The multiplicative parameters (neural nets, linear models), usually excluding the bias/intercept."],
+    ["Coefficients","The weights of a linear/logistic model (the β's), read as effect sizes."],
+  ], bottom:"They overlap. The <b>bias / intercept is a parameter but not a “weight” or “coefficient.”</b>"},
+
+  {t:"Error · Residual · Loss", c:"eval", items:[
+    ["Residual","Observed minus predicted for one point (y − ŷ) — a real number you can plot."],
+    ["Loss","A function <em>of</em> the residual/prediction used for optimization (e.g. the squared residual)."],
+    ["Error","Overloaded: sometimes = residual, sometimes = irreducible noise, sometimes = a metric (“test error”)."],
+  ], bottom:"A <b>residual is a quantity; a loss is computed from it.</b> They are not the same thing."},
+
+  {t:"Bias — three different meanings", c:"core", items:[
+    ["Bias (bias–variance)","Systematic error from an over-simple model; the cause of underfitting."],
+    ["Bias term / bias unit / intercept","The additive constant b in wᵀx + b."],
+    ["Bias (data / fairness)","Systematic skew in the data or predictions, e.g. against a group."],
+  ], bottom:"Same word, three unrelated meanings — <b>always disambiguate by context.</b>"},
+
+  {t:"Variance — two different meanings", c:"core", items:[
+    ["Variance (statistics)","The spread of a distribution, σ²."],
+    ["Variance (bias–variance)","How much the fitted model changes with the particular training sample; the cause of overfitting."],
+  ], bottom:"Related in spirit but not the same quantity."},
+
+  {t:"Scaling · Standardization · Normalization", c:"data", items:[
+    ["Scaling","Umbrella term for transforming a feature's range."],
+    ["Standardization (z-score)","Subtract the mean, divide by the std → mean 0, std 1."],
+    ["Normalization","Usually min–max scaling to [0, 1] — but often used loosely for any scaling."],
+    ["Batch/Layer normalization","A deep-learning technique that normalizes <em>activations</em> — unrelated to feature scaling."],
+  ], bottom:"“Normalize” is the most abused word here. <b>In deep learning it means normalizing activations, not features.</b>"},
+
+  {t:"Feature · Variable · Attribute · Predictor · Covariate", c:"data", items:[
+    ["All of them","Different traditions' names for one input column."],
+    ["Feature","ML / engineering."],
+    ["Variable · Predictor · Covariate · Independent variable","Statistics."],
+    ["Attribute","Data mining / databases."],
+  ], bottom:"Same object, different vocabulary. Pick one and be consistent."},
+
+  {t:"Label · Target · Class · Response · Ground truth", c:"data", items:[
+    ["Target / Label","ML name for the thing you predict (label usually implies classification)."],
+    ["Response · Dependent variable","Statistics."],
+    ["Class","The target specifically in classification."],
+    ["Ground truth","The true value used to evaluate a prediction."],
+  ], bottom:"Beware “output”: it can mean the <b>target</b> or the <b>model's prediction</b> — say which."},
+
+  {t:"Sample · Instance · Observation · Example · Data point", c:"data", items:[
+    ["In ML","All mean one unit of data — one row."],
+    ["“Sample” in statistics","A <em>set</em> of observations, not a single one."],
+  ], bottom:"This is a real trap: <b>a “sample” to an ML engineer is one row; to a statistician it's the whole collection.</b>"},
+
+  {t:"Epoch · Iteration · Batch · Step", c:"dl", items:[
+    ["Batch (mini-batch)","The group of examples processed together in one forward/backward pass."],
+    ["Iteration / Step","One parameter update — i.e. one batch."],
+    ["Epoch","One full pass over the entire training set = (dataset size ÷ batch size) iterations."],
+  ], bottom:"<b>1 epoch = many iterations; 1 iteration = 1 batch = 1 weight update.</b>"},
+
+  {t:"Precision · Recall · Sensitivity · Specificity", c:"eval", items:[
+    ["Precision","Of the points predicted positive, the fraction actually positive: TP / (TP+FP)."],
+    ["Recall = Sensitivity = TPR","Of the actually-positive points, the fraction found: TP / (TP+FN)."],
+    ["Specificity = TNR","Of the actually-negative points, the fraction correctly rejected: TN / (TN+FP)."],
+  ], bottom:"<b>Recall and sensitivity are literally the same number</b> (ML vs medical naming). FPR = 1 − specificity."},
+
+  {t:"Accuracy vs Precision", c:"eval", items:[
+    ["Accuracy","Overall fraction of correct predictions."],
+    ["Precision (ML)","Correctness among positive predictions only."],
+    ["Precision (measurement)","Reproducibility/consistency of a measurement — a different notion entirely."],
+  ], bottom:"Everyday speech treats them as synonyms; in ML they are <b>different metrics.</b>"},
+
+  {t:"Kernel — several meanings", c:"sup", items:[
+    ["Kernel (SVM)","A similarity function K(x,x′)=φ(x)·φ(x′) that enables the kernel trick."],
+    ["Kernel / filter (CNN)","The small weight window slid over an image in a convolution."],
+    ["Kernel (density / kernel PCA)","A weighting function around each point."],
+  ], bottom:"Three unrelated uses in this course alone (plus “GPU/OS kernel” outside it). <b>Context is everything.</b>"},
+
+  {t:"Filter vs Kernel (CNN)", c:"dl", items:[
+    ["Kernel","The 2-D weight window for a single input channel."],
+    ["Filter","The full stack of kernels across all input channels that produces one output feature map."],
+  ], bottom:"Widely used as synonyms; the strict distinction only matters with multiple channels."},
+
+  {t:"Bagging · Boosting · Stacking", c:"tree", items:[
+    ["Bagging","Train models in <em>parallel</em> on bootstrap resamples, then average/vote — reduces variance (e.g. Random Forest)."],
+    ["Boosting","Train models <em>sequentially</em>, each fixing the last's mistakes — reduces bias (e.g. XGBoost)."],
+    ["Stacking","Train a meta-model on the predictions of several base models."],
+  ], bottom:"<b>Parallel & variance-reducing (bagging) vs sequential & bias-reducing (boosting).</b>"},
+
+  {t:"Supervised · Unsupervised · Self-supervised · Semi-supervised", c:"core", items:[
+    ["Supervised","Labeled data; learn X → y."],
+    ["Unsupervised","No labels; find structure in X (clustering, PCA)."],
+    ["Semi-supervised","A small labeled set plus a large unlabeled set."],
+    ["Self-supervised","Labels are generated from the data itself (masked words, next token) — powers pretraining."],
+  ], bottom:"Self-supervised is not “unsupervised”: it invents a supervised task <b>from</b> unlabeled data."},
+
+  {t:"Feature selection · Feature extraction · Dimensionality reduction", c:"unsup", items:[
+    ["Feature selection","Keep a <em>subset</em> of the original features."],
+    ["Feature extraction","Build <em>new</em> features from combinations of the originals (PCA, embeddings)."],
+    ["Dimensionality reduction","Umbrella for reducing the number of features; usually connotes extraction (PCA, t-SNE)."],
+  ], bottom:"Selection keeps originals; extraction creates new ones. Both reduce dimensionality."},
+
+  {t:"Gradient descent vs Backpropagation", c:"dl", items:[
+    ["Backpropagation","The <em>algorithm that computes</em> the gradients (chain rule, backward through the network)."],
+    ["Gradient descent","The <em>optimizer that uses</em> those gradients to update the weights."],
+  ], bottom:"<b>Backprop computes the gradient; gradient descent (or Adam) takes the step.</b> Backprop isn't “learning” by itself."},
+
+  {t:"Inference — two meanings", c:"core", items:[
+    ["Inference (statistics)","Drawing conclusions about a population or parameters — confidence intervals, hypothesis tests."],
+    ["Inference (ML / deployment)","Running a trained model to get predictions (“inference time” vs “training time”)."],
+  ], bottom:"In this course “inference” usually means <b>getting predictions from a trained model.</b>"},
+
+  {t:"AI · ML · Deep Learning · Data Mining", c:"core", items:[
+    ["Artificial intelligence","The broadest field — any machine doing “intelligent” tasks."],
+    ["Machine learning","Systems that learn patterns from data. A subset of AI."],
+    ["Deep learning","ML using many-layered neural networks. A subset of ML."],
+    ["Data mining","Discovering patterns in large datasets — overlaps ML and databases."],
+  ], bottom:"Nested: <b>AI ⊃ ML ⊃ deep learning.</b> Data mining and data science overlap ML rather than nesting neatly."},
+
+  {t:"Regression — task vs model vs phenomenon", c:"sup", items:[
+    ["Regression (task)","Predicting a <em>continuous</em> target."],
+    ["Logistic “regression”","A named model that does <em>classification</em> — the name is historical."],
+    ["Regression to the mean","A statistical phenomenon (extremes drift toward average) — unrelated."],
+  ], bottom:"<b>Logistic regression is classification.</b> Don't let the word “regression” mislead you."},
+
+  {t:"Overfitting · Underfitting (and their aliases)", c:"core", items:[
+    ["Overfitting = high variance","Model too complex; fits noise. Low training error, high test error."],
+    ["Underfitting = high bias","Model too simple; misses real structure. High training error too."],
+  ], bottom:"Diagnose by the <b>gap</b>: big train/test gap → overfit; both bad → underfit."},
+
+  {t:"Correlation · Covariance · Causation", c:"data", items:[
+    ["Covariance","Raw co-variation of two variables; units-dependent, unbounded."],
+    ["Correlation","Covariance normalized to [−1, 1] (Pearson)."],
+    ["Causation","X actually causes Y — <em>not</em> implied by either of the above."],
+  ], bottom:"Correlation is standardized covariance; <b>neither implies causation.</b>"},
+
+  {t:"L1 vs L2 (norm · penalty · loss)", c:"eval", items:[
+    ["L1 (Lasso / MAE)","Sum of |·|. As a penalty it drives coefficients to <em>exactly zero</em> (sparsity); as a loss it's MAE."],
+    ["L2 (Ridge / weight decay / MSE)","Sum of squares. As a penalty it shrinks coefficients <em>smoothly</em>; as a loss it's MSE."],
+  ], bottom:"<b>L1 → sparse/robust; L2 → smooth shrinkage.</b> Same idea appears as a norm, a regularizer, and a loss."},
+];
+
+/* ── A–Z terms ──────────────────────────────────────────────────────────── */
+const TERMS = [
+  // Foundations
+  {t:"Machine learning",c:"core",w:1,d:"Building models that learn patterns from data rather than being explicitly programmed with rules.",see:["Data mining","Supervised learning","Deep learning"]},
+  {t:"Data mining",c:"core",w:1,d:"Discovering useful patterns and structure in large datasets; overlaps ML and databases.",see:["Machine learning"]},
+  {t:"Supervised learning",c:"core",w:3,d:"Learning a mapping from inputs X to a known target y using labeled examples.",see:["Unsupervised learning","Label"]},
+  {t:"Unsupervised learning",c:"core",w:7,d:"Finding structure in inputs X with no labels — e.g. clustering or dimensionality reduction.",see:["Clustering","PCA"]},
+  {t:"Generalization",c:"core",w:3,d:"How well a model performs on new, unseen data — the whole point of ML.",see:["Overfitting","Train/validation/test split"]},
+  {t:"Capacity",c:"core",w:3,d:"A model's flexibility — its ability to fit complex patterns. Too much capacity invites overfitting.",see:["Overfitting","Bias–variance tradeoff"]},
+  {t:"Overfitting",a:["high variance"],c:"core",w:3,d:"Fitting the training data (including its noise) so closely that test performance suffers. Low train error, high test error.",see:["Underfitting","Regularization","Bias–variance tradeoff"]},
+  {t:"Underfitting",a:["high bias"],c:"core",w:3,d:"A model too simple to capture the real structure; poor on both training and test data.",see:["Overfitting","Capacity"]},
+  {t:"Bias–variance tradeoff",c:"core",w:3,d:"Expected error = bias² + variance + irreducible noise. Simpler models have more bias; complex ones more variance. The central tension of ML.",see:["Overfitting","Underfitting","Noise"]},
+  {t:"Noise",a:["irreducible error"],c:"core",w:3,d:"Randomness in the data that no model can explain; sets a floor on achievable error.",see:["Bias–variance tradeoff"]},
+  {t:"Baseline",c:"core",w:3,d:"A deliberately simple model (predict the majority class or the mean) that any real model must beat to justify itself.",see:["Generalization"]},
+  {t:"Parameter",c:"core",w:3,d:"A value learned from data during training (weights, coefficients, thresholds).",see:["Hyperparameter","Weight"]},
+  {t:"Hyperparameter",c:"core",w:4,d:"A setting fixed before training and not adjusted by the fit (learning rate, k, max_depth, C).",see:["Parameter","Grid search"]},
+  {t:"Loss function",a:["cost function"],c:"core",w:3,d:"A measure of prediction error that training minimizes; per-example (loss) vs aggregated (cost).",see:["Objective function","Cross-entropy","Mean squared error"]},
+  {t:"Objective function",c:"core",w:3,d:"The quantity an optimizer minimizes or maximizes — usually the cost, possibly plus regularization.",see:["Loss function","Regularization"]},
+  {t:"Gradient descent",c:"core",w:8,d:"Iterative optimization: compute the gradient of the loss w.r.t. parameters and step in the negative direction.",see:["Learning rate","Backpropagation","Stochastic gradient descent"]},
+  {t:"Regularization",c:"core",w:3,d:"Any technique that constrains model complexity to reduce overfitting (L1/L2 penalties, dropout, early stopping).",see:["Ridge regression","Lasso","Dropout"]},
+  {t:"Pipeline",c:"core",w:4,d:"A chained sequence of preprocessing + model steps fit as one unit, so preprocessing is refit within each CV fold — the main defense against leakage.",see:["Data leakage","Cross-validation"]},
+  {t:"Data leakage",c:"core",w:4,d:"When information from outside the training fold sneaks into training (scaler fit on all data, target encoding without CV), inflating results.",see:["Pipeline","Train/validation/test split"]},
+  {t:"IID assumption",c:"core",w:2,d:"Independent and identically distributed samples — assumed by most classical models and broken by time series.",see:["Stationarity","Cross-validation"]},
+  {t:"Inference",c:"core",w:8,d:"In ML, running a trained model to produce predictions (contrast: training). In statistics, drawing conclusions about a population.",see:["Machine learning"]},
+  {t:"Ground truth",c:"core",w:3,d:"The true target value used to evaluate predictions.",see:["Label"]},
+  {t:"Deep learning",c:"dl",w:8,d:"Machine learning with many-layered neural networks; dominant on perceptual data (images, audio, text).",see:["Neural network","Multilayer perceptron"]},
+
+  // Data & features
+  {t:"Exploratory data analysis",a:["EDA"],c:"data",w:1,d:"The first-look phase: summarize, visualize, and sanity-check a dataset before modeling.",see:["Descriptive statistics","Outlier"]},
+  {t:"Missing values",c:"data",w:1,d:"Absent entries; classified as MCAR/MAR/MNAR. Sometimes “missing” is itself a category.",see:["Imputation"]},
+  {t:"Imputation",c:"data",w:1,d:"Filling missing values — by mean/median/mode, forward-fill, or a model.",see:["Missing values"]},
+  {t:"One-hot encoding",a:["dummy variables"],c:"data",w:1,d:"Turning a categorical column into binary indicator columns, one per category.",see:["Ordinal encoding","Target encoding"]},
+  {t:"Ordinal encoding",c:"data",w:1,d:"Mapping ordered categories to integers (low/med/high → 0/1/2). Wrong for unordered categories.",see:["One-hot encoding"]},
+  {t:"Target encoding",c:"data",w:6,d:"Replacing a category with a statistic of the target for that category. Powerful but leaks without careful CV.",see:["Data leakage","CatBoost"]},
+  {t:"Feature scaling",c:"data",w:1,d:"Transforming feature ranges so no column dominates by magnitude; required by distance- and gradient-based methods.",see:["Standardization","Min-max scaling"]},
+  {t:"Standardization",a:["z-score"],c:"data",w:1,d:"Subtract the mean and divide by the standard deviation → mean 0, std 1.",see:["Feature scaling","Min-max scaling"]},
+  {t:"Min-max scaling",a:["normalization"],c:"data",w:1,d:"Rescale a feature linearly to a fixed range, usually [0, 1].",see:["Standardization","Feature scaling"]},
+  {t:"Outlier",c:"data",w:1,d:"A point far from the rest of the data; may be an error or the signal you care about. Detect via box plots, z-score, IQR.",see:["Skewness","Descriptive statistics"]},
+  {t:"Skewness",c:"data",w:1,d:"Asymmetry of a distribution; pulls the mean away from the median. Often fixed with a log transform.",see:["Descriptive statistics","Outlier"]},
+  {t:"Descriptive statistics",c:"data",w:1,d:"Summaries of data: mean, median, variance, IQR. Can hide structure — see Anscombe's quartet.",see:["Anscombe's quartet","Correlation"]},
+  {t:"Anscombe's quartet",c:"data",w:1,d:"Four datasets with identical summary statistics but wildly different shapes — the case for always plotting your data.",see:["Descriptive statistics"]},
+  {t:"Correlation",c:"data",w:1,d:"A normalized [−1, 1] measure of linear (Pearson) or monotonic (Spearman) association. Not causation; misses non-linear links.",see:["Covariance"]},
+  {t:"Covariance",c:"data",w:7,d:"Unnormalized co-variation of two variables; its matrix underlies PCA.",see:["Correlation","PCA"]},
+  {t:"Class imbalance",c:"data",w:3,d:"When one class vastly outnumbers others, making accuracy misleading and requiring careful metrics/resampling.",see:["Precision","Recall","Stratified k-fold"]},
+  {t:"Feature engineering",c:"data",w:7,d:"Crafting informative inputs from raw data (ratios, log transforms, date parts, domain features). Often beats fancier models.",see:["Feature selection","Feature extraction"]},
+  {t:"Feature selection",c:"data",w:7,d:"Keeping a subset of the original features via filter, wrapper, or embedded (L1, tree importance) methods.",see:["Feature extraction","Lasso"]},
+  {t:"Feature extraction",c:"unsup",w:7,d:"Building new features from combinations of originals (PCA components, embeddings).",see:["PCA","Feature selection"]},
+  {t:"Curse of dimensionality",c:"data",w:7,d:"In high dimensions distances concentrate and data becomes sparse, so models overfit — motivating dimensionality reduction.",see:["PCA","k-nearest neighbors"]},
+
+  // Time series
+  {t:"Time series",c:"ts",w:2,d:"Data indexed and ordered by time; observations are dependent, so the IID assumption fails.",see:["Stationarity","Autocorrelation"]},
+  {t:"Trend",c:"ts",w:2,d:"The long-term direction of a series.",see:["Seasonality","Decomposition"]},
+  {t:"Seasonality",c:"ts",w:2,d:"Regular, fixed-period patterns (daily, yearly). Contrast with cycles, which have no fixed period.",see:["Trend","Decomposition"]},
+  {t:"Decomposition",c:"ts",w:2,d:"Splitting a series into trend + seasonality + residual, additively or multiplicatively.",see:["Trend","Seasonality"]},
+  {t:"Stationarity",c:"ts",w:2,d:"A series whose statistical properties (mean, variance, autocovariance) don't change over time. ARIMA assumes it.",see:["Differencing","ADF test","ARIMA"]},
+  {t:"Differencing",c:"ts",w:2,d:"Subtracting consecutive (or seasonal) values to remove trend/seasonality and reach stationarity — the “I” in ARIMA.",see:["Stationarity","ARIMA"]},
+  {t:"Autocorrelation (ACF)",c:"ts",w:2,d:"Correlation of a series with lagged copies of itself; the ACF plot helps identify MA order.",see:["Partial autocorrelation","ARIMA"]},
+  {t:"Partial autocorrelation (PACF)",c:"ts",w:2,d:"Correlation at a lag after removing shorter-lag effects; the PACF plot helps identify AR order.",see:["Autocorrelation (ACF)","ARIMA"]},
+  {t:"ARIMA",c:"ts",w:2,d:"AutoRegressive Integrated Moving Average — combines AR (past values), I (differencing), and MA (past errors) to model stationary series.",see:["Stationarity","SARIMA","Autocorrelation (ACF)"]},
+  {t:"SARIMA",c:"ts",w:2,d:"Seasonal ARIMA — adds seasonal AR/I/MA terms for series with a repeating period.",see:["ARIMA","Seasonality"]},
+  {t:"Walk-forward validation",c:"ts",w:2,d:"Time-series validation that always trains on the past and tests on the future (expanding or sliding window). Never shuffle time series.",see:["Cross-validation","Time series"]},
+  {t:"White noise",c:"ts",w:2,d:"A series with no autocorrelation — the ideal residual of a good time-series model.",see:["Autocorrelation (ACF)","ARIMA"]},
+
+  // Supervised models
+  {t:"Linear regression",c:"sup",w:3,d:"Fits a linear function of the features to a continuous target by minimizing squared error; has a closed-form solution.",see:["Ordinary least squares","Polynomial regression","Ridge regression"]},
+  {t:"Ordinary least squares",a:["OLS"],c:"sup",w:3,d:"The method behind linear regression: choose coefficients that minimize the sum of squared residuals.",see:["Linear regression","Residual"]},
+  {t:"Polynomial regression",c:"sup",w:3,d:"Linear regression on polynomial features of the inputs — still linear in the parameters, but able to bend.",see:["Linear regression","Overfitting"]},
+  {t:"Logistic regression",c:"sup",w:3,d:"A linear <em>classifier</em> (despite the name) that squashes wᵀx through a sigmoid to output class probabilities.",see:["Sigmoid","Cross-entropy","Decision boundary"]},
+  {t:"Sigmoid",c:"sup",w:3,d:"The S-shaped function σ(z)=1/(1+e⁻ᶻ) mapping any real number to (0, 1); used for probabilities and as an activation.",see:["Softmax","Logistic regression","Activation function"]},
+  {t:"Softmax",c:"dl",w:8,d:"Generalizes the sigmoid to multiple classes: turns a vector of scores into a probability distribution.",see:["Sigmoid","Cross-entropy"]},
+  {t:"k-nearest neighbors",a:["k-NN"],c:"sup",w:3,d:"A lazy, non-parametric method: predict from the k closest training points. Sensitive to scaling and the curse of dimensionality.",see:["Distance metric","Curse of dimensionality"]},
+  {t:"Distance metric",c:"sup",w:3,d:"How “closeness” is measured — Euclidean (default), Manhattan, or cosine (for text/high-dim sparse data).",see:["k-nearest neighbors","Clustering"]},
+  {t:"Decision boundary",c:"sup",w:3,d:"The surface in feature space where a classifier switches its predicted class.",see:["Logistic regression","Support vector machine"]},
+  {t:"Hyperplane",c:"sup",w:4,d:"A flat (linear) decision surface in feature space — a line in 2-D, a plane in 3-D, and so on.",see:["Support vector machine","Decision boundary"]},
+  {t:"Support vector machine",a:["SVM"],c:"sup",w:4,d:"A classifier that finds the boundary with the widest margin to the nearest points, and uses kernels for non-linear boundaries.",see:["Margin","Kernel trick","Support vector"]},
+  {t:"Support vector",c:"sup",w:4,d:"The few training points that touch (or violate) the margin and alone determine an SVM's boundary.",see:["Support vector machine","Margin"]},
+  {t:"Margin",c:"sup",w:4,d:"The gap between an SVM's boundary and the nearest points; SVMs maximize it. “Soft” margins allow violations via the C parameter.",see:["Support vector machine","C parameter"]},
+  {t:"C parameter",c:"sup",w:4,d:"An SVM's regularization knob: large C penalizes margin violations (low bias, high variance), small C allows them.",see:["Support vector machine","Bias–variance tradeoff"]},
+  {t:"Kernel trick",c:"sup",w:4,d:"Computing inner products in a high-dimensional feature space without ever forming it — lets linear methods draw non-linear boundaries.",see:["RBF kernel","Support vector machine"]},
+  {t:"RBF kernel",a:["Gaussian kernel"],c:"sup",w:4,d:"The most common SVM kernel, K(x,x′)=exp(−γ‖x−x′‖²); γ controls boundary wiggliness (bias–variance).",see:["Kernel trick","C parameter"]},
+  {t:"Ridge regression",a:["L2 regularization"],c:"sup",w:3,d:"Linear regression with an L2 penalty on coefficients; shrinks them smoothly toward zero.",see:["Lasso","Regularization"]},
+  {t:"Lasso",a:["L1 regularization"],c:"sup",w:3,d:"Linear regression with an L1 penalty; drives some coefficients to exactly zero, doing feature selection.",see:["Ridge regression","Feature selection"]},
+
+  // Evaluation & tuning
+  {t:"Confusion matrix",c:"eval",w:3,d:"A table of predicted vs actual classes (TP, FP, TN, FN) from which most classification metrics are derived.",see:["Precision","Recall","Accuracy"]},
+  {t:"Accuracy",c:"eval",w:3,d:"Fraction of predictions that are correct. Misleading under class imbalance.",see:["Precision","Recall","Class imbalance"]},
+  {t:"Precision",c:"eval",w:3,d:"Of the points predicted positive, the fraction truly positive: TP/(TP+FP). Matters when false positives are costly.",see:["Recall","F1 score"]},
+  {t:"Recall",a:["sensitivity","TPR"],c:"eval",w:3,d:"Of the truly-positive points, the fraction found: TP/(TP+FN). Matters when misses are costly.",see:["Precision","Specificity"]},
+  {t:"Specificity",a:["TNR"],c:"eval",w:3,d:"Of the truly-negative points, the fraction correctly rejected: TN/(TN+FP). FPR = 1 − specificity.",see:["Recall","ROC curve"]},
+  {t:"F1 score",c:"eval",w:3,d:"The harmonic mean of precision and recall; a single number balancing the two.",see:["Precision","Recall"]},
+  {t:"ROC curve",c:"eval",w:3,d:"Plots true-positive rate vs false-positive rate across all thresholds; threshold-independent view of a probabilistic classifier.",see:["AUC","Precision-recall curve"]},
+  {t:"AUC",a:["ROC-AUC"],c:"eval",w:3,d:"Area under the ROC curve; the probability a random positive is ranked above a random negative. 0.5 = chance, 1.0 = perfect.",see:["ROC curve"]},
+  {t:"Precision-recall curve",c:"eval",w:3,d:"Precision vs recall across thresholds; more informative than ROC under heavy class imbalance.",see:["ROC curve","Precision"]},
+  {t:"R-squared",a:["R²","coefficient of determination"],c:"eval",w:3,d:"Fraction of target variance explained by a regression. Always rises with more features — hence adjusted R².",see:["Mean squared error"]},
+  {t:"Mean squared error",a:["MSE","RMSE"],c:"eval",w:3,d:"Average squared residual (RMSE is its square root, in the target's units). Penalizes large errors heavily.",see:["Mean absolute error","Loss function"]},
+  {t:"Mean absolute error",a:["MAE","MAPE"],c:"eval",w:2,d:"Average absolute residual; more robust to outliers than MSE. MAPE is its percentage form (breaks near zero).",see:["Mean squared error"]},
+  {t:"Cross-validation",a:["k-fold"],c:"eval",w:4,d:"Rotating which fold of the training data serves as validation, then averaging — a lower-variance estimate than one split.",see:["Stratified k-fold","Grid search","Data leakage"]},
+  {t:"Stratified k-fold",c:"eval",w:4,d:"Cross-validation that preserves class proportions in every fold; important for imbalanced classification.",see:["Cross-validation","Class imbalance"]},
+  {t:"Grid search",c:"eval",w:4,d:"Exhaustively trying every combination in a hyperparameter grid, scored by cross-validation.",see:["Random search","Hyperparameter","Cross-validation"]},
+  {t:"Random search",c:"eval",w:4,d:"Sampling random hyperparameter combinations; often more efficient than grid search in high dimensions.",see:["Grid search","Hyperparameter"]},
+  {t:"Early stopping",c:"eval",w:6,d:"Halting training when validation performance stops improving — the simplest, most reliable regularizer.",see:["Regularization","Overfitting"]},
+
+  // Trees & ensembles
+  {t:"Decision tree",c:"tree",w:5,d:"A model of nested yes/no questions on features; interpretable when shallow, high-variance and prone to overfitting when deep.",see:["Gini impurity","Random forest","Pruning"]},
+  {t:"Gini impurity",c:"tree",w:5,d:"A measure of class mixing at a tree node; splits are chosen to reduce it (or entropy) the most.",see:["Entropy","Information gain","Decision tree"]},
+  {t:"Entropy",c:"tree",w:5,d:"An information-theoretic measure of node impurity; alternative to Gini for choosing tree splits.",see:["Gini impurity","Information gain"]},
+  {t:"Information gain",c:"tree",w:5,d:"The drop in impurity from a split (parent impurity minus weighted child impurity) — the engine of tree growth.",see:["Gini impurity","Decision tree"]},
+  {t:"Pruning",c:"tree",w:5,d:"Limiting tree complexity to curb overfitting — pre-pruning (stop early) or post-pruning (grow then cut back).",see:["Decision tree","Overfitting"]},
+  {t:"Ensemble",c:"tree",w:5,d:"Combining many models into one stronger predictor via bagging, boosting, or stacking.",see:["Bagging","Boosting","Random forest"]},
+  {t:"Bagging",a:["bootstrap aggregation"],c:"tree",w:5,d:"Training models in parallel on bootstrap resamples and averaging; reduces variance. Basis of the random forest.",see:["Bootstrap","Random forest","Boosting"]},
+  {t:"Bootstrap",c:"tree",w:5,d:"Sampling a dataset of the same size with replacement; ~37% of rows are left out (the out-of-bag set).",see:["Bagging","Out-of-bag error"]},
+  {t:"Out-of-bag error",a:["OOB"],c:"tree",w:5,d:"A free validation estimate from the rows each bootstrap sample left out.",see:["Bootstrap","Random forest"]},
+  {t:"Random forest",c:"tree",w:5,d:"A bagged ensemble of decorrelated trees (row + feature subsampling). Strong, low-tuning baseline that resists overfitting.",see:["Bagging","Feature importance","Decision tree"]},
+  {t:"Feature importance",c:"tree",w:5,d:"How much each feature contributes to a model — via impurity decrease (biased) or permutation (more reliable).",see:["Random forest","SHAP"]},
+  {t:"Boosting",c:"tree",w:6,d:"Training weak learners sequentially, each correcting the last's errors; reduces bias. Can overfit, so watch validation loss.",see:["Bagging","Gradient boosting","Weak learner"]},
+  {t:"Weak learner",c:"tree",w:6,d:"A model only slightly better than chance (typically a shallow tree/stump); boosting combines many into a strong one.",see:["Boosting","AdaBoost"]},
+  {t:"AdaBoost",c:"tree",w:6,d:"The original boosting algorithm: reweight misclassified points upward each round so the next learner focuses on them.",see:["Boosting","Gradient boosting"]},
+  {t:"Gradient boosting",c:"tree",w:6,d:"Boosting that fits each new tree to the residuals (negative gradient of the loss) of the current ensemble.",see:["Boosting","Learning rate","XGBoost"]},
+  {t:"Learning rate",a:["shrinkage"],c:"tree",w:6,d:"In boosting, how much each new tree contributes; small rate + many trees is the standard recipe. (In NNs, the gradient-descent step size.)",see:["Gradient boosting","Gradient descent"]},
+  {t:"XGBoost",c:"tree",w:6,d:"A fast, regularized gradient-boosting library; long the default for tabular competitions.",see:["Gradient boosting","LightGBM","CatBoost"]},
+  {t:"LightGBM",c:"tree",w:6,d:"A gradient-boosting library using leaf-wise growth and histogram splits; fastest of the three on large data.",see:["XGBoost","CatBoost"]},
+  {t:"CatBoost",c:"tree",w:6,d:"A gradient-boosting library with native, leakage-aware handling of categorical features.",see:["XGBoost","Target encoding"]},
+  {t:"SHAP",a:["Shapley values"],c:"tree",w:6,d:"A game-theoretic method that fairly attributes each prediction to its features, with local + global views and axiomatic guarantees.",see:["Feature importance"]},
+
+  // Unsupervised & dimensionality reduction
+  {t:"Clustering",c:"unsup",w:7,d:"Grouping similar points without labels — for segmentation, anomaly detection, or exploration.",see:["K-means","DBSCAN","Silhouette score"]},
+  {t:"K-means",c:"unsup",w:7,d:"Partition data into K clusters by alternating point-to-centroid assignment and centroid update; minimizes within-cluster variance.",see:["Centroid","Elbow method","DBSCAN"]},
+  {t:"Centroid",c:"unsup",w:7,d:"The mean point of a cluster; K-means represents each cluster by its centroid.",see:["K-means","Inertia"]},
+  {t:"Inertia",c:"unsup",w:7,d:"Within-cluster sum of squared distances to centroids; what K-means minimizes and the elbow method plots.",see:["K-means","Elbow method"]},
+  {t:"Elbow method",c:"unsup",w:7,d:"Choosing K by plotting inertia vs K and looking for the “elbow” where gains level off. Often no clean elbow exists.",see:["K-means","Silhouette score"]},
+  {t:"Silhouette score",c:"unsup",w:7,d:"How well each point fits its cluster vs the nearest other cluster (−1 to 1); a more reliable K-selection guide than the elbow.",see:["Clustering","Elbow method"]},
+  {t:"DBSCAN",c:"unsup",w:7,d:"Density-based clustering: finds arbitrarily-shaped clusters and labels sparse points as noise; needs ε and minPts, not K.",see:["K-means","Clustering"]},
+  {t:"Hierarchical clustering",c:"unsup",w:7,d:"Building a tree of nested clusters (agglomerative or divisive), visualized as a dendrogram and cut at a chosen height.",see:["Dendrogram","Clustering"]},
+  {t:"Dendrogram",c:"unsup",w:7,d:"The tree diagram from hierarchical clustering; cutting it at a height chooses the number of clusters.",see:["Hierarchical clustering"]},
+  {t:"PCA",a:["principal component analysis"],c:"unsup",w:7,d:"Linear dimensionality reduction: project data onto orthogonal directions of maximum variance. Scale-sensitive — standardize first.",see:["Principal component","Explained variance","Feature extraction"]},
+  {t:"Principal component",c:"unsup",w:7,d:"An eigenvector of the covariance matrix — a new axis that is a linear combination of original features.",see:["PCA","Explained variance"]},
+  {t:"Explained variance",c:"unsup",w:7,d:"The share of total variance captured by each principal component; the scree plot shows how many to keep.",see:["PCA","Principal component"]},
+  {t:"t-SNE",c:"unsup",w:7,d:"A non-linear technique for visualizing high-dimensional data in 2-D/3-D. For plotting only — not preprocessing.",see:["UMAP","PCA"]},
+  {t:"UMAP",c:"unsup",w:7,d:"A faster alternative to t-SNE for visualization that better preserves global structure.",see:["t-SNE","PCA"]},
+
+  // Neural & deep learning
+  {t:"Neural network",c:"dl",w:8,d:"A model of layers of connected artificial neurons; the umbrella covering MLPs, CNNs, RNNs, and transformers.",see:["Multilayer perceptron","Neuron","Deep learning"]},
+  {t:"Neuron",a:["perceptron"],c:"dl",w:8,d:"The basic unit: a weighted sum of inputs plus a bias, passed through an activation. A single perceptron can't learn XOR.",see:["Activation function","Multilayer perceptron"]},
+  {t:"Multilayer perceptron",a:["MLP","feedforward network"],c:"dl",w:8,d:"A feedforward net of fully-connected layers with non-linear activations; a universal approximator in principle.",see:["Neural network","Activation function","Forward pass"]},
+  {t:"Activation function",c:"dl",w:8,d:"The non-linearity applied at each neuron (sigmoid, tanh, ReLU); without it, stacked layers collapse to a linear model.",see:["ReLU","Sigmoid","Neural network"]},
+  {t:"ReLU",c:"dl",w:8,d:"Rectified Linear Unit, max(0, z); the default activation — no positive-side saturation, fast, mitigates vanishing gradients.",see:["Activation function","Vanishing gradient"]},
+  {t:"Forward pass",c:"dl",w:8,d:"Evaluating a network from inputs to output: alternating matrix multiplications and activations.",see:["Backpropagation","Multilayer perceptron"]},
+  {t:"Backpropagation",c:"dl",w:8,d:"The algorithm that computes loss gradients by applying the chain rule backward through the network — same cost as the forward pass.",see:["Gradient descent","Autograd","Forward pass"]},
+  {t:"Autograd",c:"dl",w:8,d:"Automatic differentiation in frameworks like PyTorch: you write the forward pass, gradients come for free.",see:["Backpropagation"]},
+  {t:"Cross-entropy",a:["log loss"],c:"dl",w:8,d:"The standard classification loss; measures the gap between predicted and true class distributions.",see:["Softmax","Loss function"]},
+  {t:"Stochastic gradient descent",a:["SGD","mini-batch"],c:"dl",w:8,d:"Gradient descent using one batch of examples per update — noisy but efficient and mildly regularizing.",see:["Gradient descent","Batch"]},
+  {t:"Batch",c:"dl",w:8,d:"The group of examples processed together in one forward/backward pass; one batch = one update (iteration).",see:["Epoch","Stochastic gradient descent"]},
+  {t:"Epoch",c:"dl",w:8,d:"One full pass over the entire training set; equals (dataset size ÷ batch size) iterations.",see:["Batch","Stochastic gradient descent"]},
+  {t:"Adam",a:["AdamW"],c:"dl",w:9,d:"An adaptive optimizer combining momentum and per-parameter learning rates; a sensible default. AdamW decouples weight decay.",see:["Momentum","Gradient descent","Weight decay"]},
+  {t:"Momentum",c:"dl",w:9,d:"Accumulating a velocity of past gradients to smooth and speed up SGD.",see:["Stochastic gradient descent","Adam"]},
+  {t:"Learning rate schedule",c:"dl",w:9,d:"Varying the learning rate during training (step decay, cosine annealing, warmup) for better convergence.",see:["Learning rate","Adam"]},
+  {t:"Batch normalization",c:"dl",w:9,d:"Normalizing layer activations within each mini-batch; speeds training, allows higher learning rates, mildly regularizes.",see:["Layer normalization","Standardization"]},
+  {t:"Layer normalization",c:"dl",w:10,d:"Normalizing activations across features for each example; the norm used inside transformers.",see:["Batch normalization","Transformer"]},
+  {t:"Dropout",c:"dl",w:9,d:"Randomly zeroing activations during training to prevent co-adaptation; like averaging an ensemble of sub-networks. Off at test time.",see:["Regularization","Overfitting"]},
+  {t:"Weight decay",a:["L2 regularization"],c:"dl",w:9,d:"Penalizing large weights to reduce variance; the neural-net form of L2/Ridge regularization.",see:["Regularization","Ridge regression"]},
+  {t:"Data augmentation",c:"dl",w:9,d:"Expanding the training set with label-preserving transforms (crops, flips, color jitter); standard for vision.",see:["Overfitting","Convolutional neural network"]},
+  {t:"Vanishing gradient",c:"dl",w:9,d:"Gradients shrinking toward zero through many layers/time steps, stalling learning; mitigated by ReLU, skip connections, LSTMs.",see:["ReLU","Skip connection","LSTM"]},
+  {t:"Transfer learning",c:"dl",w:9,d:"Reusing a model pretrained on a large dataset and fine-tuning it on yours; beats training from scratch on small data.",see:["Fine-tuning","Pretrained model","Backbone"]},
+  {t:"Fine-tuning",c:"dl",w:9,d:"Continuing training a pretrained model on a new task — either just the head (feature extraction) or the whole model at a small LR.",see:["Transfer learning","Backbone"]},
+  {t:"Pretrained model",c:"dl",w:9,d:"A model already trained on a large corpus (ImageNet CNNs, BERT) that you adapt rather than train from scratch.",see:["Transfer learning","Backbone"]},
+  {t:"Backbone",c:"dl",w:9,d:"The pretrained feature-extracting body of a network, to which you attach a new task-specific head.",see:["Transfer learning","Fine-tuning"]},
+
+  // CNN
+  {t:"Convolutional neural network",a:["CNN"],c:"dl",w:9,d:"A network for images that slides learnable filters over the input, exploiting locality and translation invariance.",see:["Convolution","Pooling","Feature map"]},
+  {t:"Convolution",c:"dl",w:9,d:"Sliding a small learnable kernel over an input and taking dot products to produce a feature map.",see:["Convolutional neural network","Feature map","Pooling"]},
+  {t:"Feature map",c:"dl",w:9,d:"The output of one convolutional filter — a map of where that pattern was detected.",see:["Convolution","Convolutional neural network"]},
+  {t:"Pooling",c:"dl",w:9,d:"Downsampling feature maps (max or average) to shrink them and add small-translation invariance.",see:["Convolution","Convolutional neural network"]},
+  {t:"Parameter sharing",c:"dl",w:9,d:"Reusing the same kernel weights across all positions — why CNNs need far fewer parameters than MLPs on images.",see:["Convolution","Convolutional neural network"]},
+  {t:"Skip connection",a:["residual connection"],c:"dl",w:9,d:"An identity shortcut that adds a layer's input to its output (ResNet), letting very deep networks train.",see:["Vanishing gradient","Convolutional neural network"]},
+
+  // Sequences & transformers
+  {t:"Recurrent neural network",a:["RNN"],c:"dl",w:10,d:"A network that processes a sequence step by step, carrying a hidden state as memory. Trained by backpropagation through time.",see:["Hidden state","LSTM","Vanishing gradient"]},
+  {t:"Hidden state",c:"dl",w:10,d:"An RNN's running memory, updated at each time step from the input and the previous state.",see:["Recurrent neural network","LSTM"]},
+  {t:"LSTM",c:"dl",w:10,d:"Long Short-Term Memory: an RNN with a gated cell state that flows through time, solving the vanishing-gradient problem.",see:["Recurrent neural network","Vanishing gradient","GRU"]},
+  {t:"GRU",c:"dl",w:10,d:"Gated Recurrent Unit: a simpler LSTM with two gates and similar performance.",see:["LSTM","Recurrent neural network"]},
+  {t:"Sequence-to-sequence",a:["seq2seq","encoder-decoder"],c:"dl",w:10,d:"An encoder reads an input sequence into a representation; a decoder generates an output sequence. Its bottleneck motivated attention.",see:["Attention","Transformer"]},
+  {t:"Attention",c:"dl",w:10,d:"Letting a model look at all input positions, weighted by relevance, instead of one fixed summary vector. Weights are interpretable.",see:["Self-attention","Query, Key, Value"]},
+  {t:"Self-attention",c:"dl",w:10,d:"Attention where queries, keys, and values all come from the same sequence — each token attends to every other, in parallel.",see:["Attention","Multi-head attention","Transformer"]},
+  {t:"Query, Key, Value",a:["QKV"],c:"dl",w:10,d:"The three projections of attention: a query is matched against keys to weight the corresponding values. The core abstraction of transformers.",see:["Self-attention","Attention"]},
+  {t:"Multi-head attention",c:"dl",w:10,d:"Running self-attention several times in parallel with different projections, so each head can specialize.",see:["Self-attention","Transformer"]},
+  {t:"Positional encoding",c:"dl",w:10,d:"Position information injected into token embeddings, since self-attention is otherwise order-blind.",see:["Self-attention","Transformer"]},
+  {t:"Transformer",c:"dl",w:10,d:"An architecture built entirely on self-attention (no recurrence): multi-head attention + feed-forward, with residuals and layer norm. Behind modern LLMs.",see:["Self-attention","BERT","GPT"]},
+  {t:"BERT",c:"dl",w:10,d:"An encoder-only transformer pretrained by masked-language modeling; fine-tuned for understanding tasks (classification, QA).",see:["Transformer","Tokenization","Fine-tuning"]},
+  {t:"GPT",c:"dl",w:10,d:"A decoder-only transformer pretrained by next-token prediction; the generative family behind modern LLMs.",see:["Transformer","BERT"]},
+  {t:"Tokenization",c:"dl",w:10,d:"Splitting text into tokens (often subwords) and mapping them to IDs before embedding.",see:["Embedding","Transformer"]},
+  {t:"Embedding",c:"dl",w:10,d:"A learned dense vector representing a token (or item), placing similar things near each other.",see:["Tokenization","Transformer"]},
+];
+
+/* ── Render ─────────────────────────────────────────────────────────────── */
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const state={q:"",cats:new Set(Object.keys(CATS))};
+
+// category chips
+const catsBox=document.getElementById("cats");
+Object.entries(CATS).forEach(([k,v])=>{
+  const b=document.createElement("button");
+  b.className="chip"; b.type="button"; b.style.setProperty("--c",v.color);
+  b.setAttribute("aria-pressed","true"); b.textContent=v.label;
+  b.addEventListener("click",()=>{ state.cats.has(k)?state.cats.delete(k):state.cats.add(k);
+    b.setAttribute("aria-pressed",state.cats.has(k)); render(); });
+  catsBox.appendChild(b);
+});
+
+// disambiguation cards
+const confBox=document.getElementById("confusables");
+DISAMBIG.forEach((d,i)=>{
+  const el=document.createElement("article");
+  el.className="dis"; el.dataset.cat=d.c; el.dataset.i=i;
+  el.style.borderLeftColor=CATS[d.c]?CATS[d.c].color:"#e3b341";
+  el.innerHTML=`<div class="tag">${CATS[d.c]?CATS[d.c].label:""}</div>
+    <h3>${d.t}</h3>
+    <dl>${d.items.map(([n,x])=>`<dt>${n}</dt><dd>${x}</dd>`).join("")}</dl>
+    ${d.bottom?`<div class="bottom">${d.bottom}</div>`:""}`;
+  confBox.appendChild(el);
+});
+
+// terms grouped by letter
+const glossary=document.getElementById("glossary");
+const sorted=[...TERMS].sort((a,b)=>a.t.toLowerCase().localeCompare(b.t.toLowerCase()));
+const letters={};
+sorted.forEach(t=>{ const L=t.t[0].toUpperCase(); (letters[L]=letters[L]||[]).push(t); });
+Object.keys(letters).sort().forEach(L=>{
+  const h=document.createElement("div"); h.className="letter"; h.id="L-"+L; h.textContent=L;
+  glossary.appendChild(h);
+  const box=document.createElement("div"); box.className="terms"; box.dataset.letter=L;
+  letters[L].forEach(t=>{
+    const c=CATS[t.c]||{color:"#8b949e",label:t.c};
+    const el=document.createElement("div");
+    el.className="term"; el.id=slug(t.t); el.dataset.cat=t.c;
+    el.dataset.text=(t.t+" "+(t.a||[]).join(" ")+" "+t.d).toLowerCase();
+    const see=(t.see||[]).map(s=>`<a href="#${slug(s)}" onclick="flash('${slug(s)}')">${s}</a>`).join(", ");
+    el.innerHTML=`<div class="head">
+        <span class="name">${t.t}</span>
+        ${t.a?`<span class="alias">${t.a.join(" · ")}</span>`:""}
+        <span class="pill" style="--c:${c.color}">${c.label}</span>
+        <span class="wk">${t.w?"Week "+t.w:""}</span>
+      </div>
+      <p class="def">${t.d}</p>
+      ${see?`<div class="see">→ see also: ${see}</div>`:""}`;
+    box.appendChild(el);
+  });
+  glossary.appendChild(box);
+});
+
+// alphabet nav
+const alpha=document.getElementById("alpha");
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(L=>{
+  const a=document.createElement("a");
+  a.textContent=L;
+  if(letters[L]){ a.href="#L-"+L; } else { a.className="off"; }
+  alpha.appendChild(a);
+});
+
+const qIn=document.getElementById("q");
+qIn.addEventListener("input",()=>{ state.q=qIn.value.toLowerCase().trim(); render(); });
+
+function render(){
+  let shown=0;
+  // terms
+  document.querySelectorAll(".term").forEach(el=>{
+    const ok=state.cats.has(el.dataset.cat) && (state.q==="" || el.dataset.text.includes(state.q));
+    el.classList.toggle("hidden",!ok); if(ok)shown++;
+  });
+  // hide empty letter groups + headers
+  document.querySelectorAll(".terms").forEach(box=>{
+    const any=[...box.children].some(c=>!c.classList.contains("hidden"));
+    box.classList.toggle("hidden",!any);
+    const hdr=document.getElementById("L-"+box.dataset.letter);
+    if(hdr)hdr.classList.toggle("hidden",!any);
+  });
+  // disambiguation cards (match by category + text)
+  let dShown=0;
+  document.querySelectorAll(".dis").forEach(el=>{
+    const d=DISAMBIG[+el.dataset.i];
+    const text=(d.t+" "+d.items.map(x=>x.join(" ")).join(" ")+" "+(d.bottom||"")).toLowerCase();
+    const ok=state.cats.has(el.dataset.cat) && (state.q==="" || text.includes(state.q));
+    el.classList.toggle("hidden",!ok); if(ok)dShown++;
+  });
+  document.getElementById("confusables-section").classList.toggle("hidden",dShown===0);
+  document.getElementById("count").textContent=shown+" term"+(shown===1?"":"s");
+}
+
+function flash(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  // ensure it's visible even if filtered out
+  el.classList.remove("hidden");
+  const box=el.closest(".terms"); if(box){box.classList.remove("hidden");
+    const hdr=document.getElementById("L-"+box.dataset.letter); if(hdr)hdr.classList.remove("hidden");}
+}
+render();
+</script>
+</body>
+</html>

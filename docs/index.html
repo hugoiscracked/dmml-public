@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DMML — Model-Selection Skill Tree</title>
+<meta name="description" content="Interactive model-selection reference for the Data Mining & Machine Learning course.">
+<style>
+  /* ============================================================================
+     DMML Skill Tree — interactive model-selection reference.
+     Palette/branch colors mirror skill_tree/render.py; node labels/edges mirror
+     skill_tree/tree.json. A few positions are tuned here for on-screen spacing
+     (SHAP pulled up; tabular columns spread) and differ from the print poster.
+     ============================================================================ */
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel-2:#1c2128;
+    --border:#21262d; --border-2:#30363d;
+    --text:#e6edf3; --dim:#8b949e; --locked:#59636e;
+    --root:#58a6ff; --tab:#3fb950; --ts:#f78166; --unsup:#2dd4bf;
+    --img:#bc8cff; --seq:#ffa657; --shap:#e3b341;
+    --font-sans: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono: ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-sans);
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 1px 1px,#161b22 1px,transparent 0);
+    background-size:26px 26px;
+  }
+  a{color:inherit}
+  .wrap{max-width:1500px;margin:0 auto;padding:22px clamp(14px,3vw,32px) 60px}
+
+  /* ── Masthead ─────────────────────────────────────────────── */
+  .masthead{border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:18px}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--root)}
+  .masthead h1{font-size:clamp(24px,3.4vw,36px);margin:.24em 0 .12em;letter-spacing:-.01em;text-wrap:balance}
+  .masthead p{margin:0;color:var(--dim);max-width:70ch;font-size:15px}
+
+  /* ── Controls ─────────────────────────────────────────────── */
+  .controls{
+    display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end;
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:14px 16px;margin-bottom:18px;
+  }
+  .ctl{display:flex;flex-direction:column;gap:7px;min-width:0}
+  .ctl > .lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  .search input{
+    background:var(--bg);border:1px solid var(--border-2);border-radius:8px;color:var(--text);
+    font:inherit;font-size:14px;padding:8px 11px;width:min(240px,58vw);
+  }
+  .search input:focus-visible{outline:2px solid var(--root);outline-offset:1px;border-color:var(--root)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    --c:var(--dim);
+    display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+    background:var(--bg);border:1px solid var(--border-2);border-radius:999px;
+    color:var(--text);font:inherit;font-size:12.5px;padding:5px 11px 5px 9px;
+    transition:border-color .15s,background .15s,opacity .15s;
+  }
+  .chip::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c);flex:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 22%,transparent)}
+  .chip[aria-pressed="false"]{opacity:.42}
+  .chip[aria-pressed="false"]::before{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+  .chip:hover{border-color:var(--c)}
+  .chip:focus-visible{outline:2px solid var(--c);outline-offset:1px}
+  .weekctl{min-width:200px}
+  .weekctl .row{display:flex;align-items:center;gap:10px}
+  .weekctl output{font-family:var(--font-mono);font-size:13px;color:var(--text);min-width:96px}
+  input[type=range]{accent-color:var(--root);width:150px}
+  .btn-reset{
+    background:transparent;border:1px solid var(--border-2);color:var(--dim);
+    border-radius:8px;font:inherit;font-size:12.5px;padding:7px 12px;cursor:pointer;
+  }
+  .btn-reset:hover{color:var(--text);border-color:var(--dim)}
+  .btn-reset:focus-visible{outline:2px solid var(--root);outline-offset:1px}
+
+  /* ── Stage: graph + inspector ─────────────────────────────── */
+  .stage{display:grid;grid-template-columns:1fr;gap:18px}
+  @media(min-width:1400px){ .stage{grid-template-columns:minmax(0,1fr) 330px} }
+
+  .graph-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:
+     linear-gradient(180deg,#0f151d,#0d1117);padding:8px}
+  .graph{position:relative;width:100%;min-width:1040px;aspect-ratio:1.92}
+  .edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .edge{stroke:var(--border-2);stroke-width:1.4;vector-effect:non-scaling-stroke;opacity:.55;
+        transition:stroke .15s,opacity .15s,stroke-width .15s}
+  .edge.hot{stroke:var(--c,#8b949e);opacity:1;stroke-width:2}
+  .edge.dim{opacity:.12}
+  .edge.faded{opacity:.10}
+  .nodes{position:absolute;inset:0}
+
+  .node{
+    --c:var(--dim);
+    position:absolute;transform:translate(-50%,-50%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    background:var(--panel);border:1.5px solid color-mix(in srgb,var(--c) 62%,var(--border-2));
+    color:var(--text);font:inherit;font-size:10.5px;line-height:1.13;font-weight:600;
+    border-radius:9px;padding:5px 8px;max-width:98px;cursor:pointer;
+    transition:transform .12s,box-shadow .15s,border-color .15s,opacity .15s,filter .15s;
+    z-index:2;
+  }
+  .node__wk{font-family:var(--font-mono);font-weight:600;font-size:8.5px;letter-spacing:.05em;color:var(--c);opacity:.9;margin-bottom:1px}
+  .node--header{
+    background:color-mix(in srgb,var(--c) 16%,var(--panel));
+    border-color:var(--c);font-size:11.5px;font-weight:700;letter-spacing:.01em;max-width:126px;
+  }
+  .node--root{background:color-mix(in srgb,var(--root) 20%,var(--panel))}
+  .node:hover,.node:focus-visible{transform:translate(-50%,-50%) scale(1.06);box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:5}
+  .node:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+  .node.hot{border-color:var(--c);box-shadow:0 0 0 1.5px var(--c),0 8px 22px rgba(0,0,0,.5);z-index:6}
+  .node.near{border-color:color-mix(in srgb,var(--c) 80%,transparent)}
+  .node.selected{border-color:var(--c);box-shadow:0 0 0 2px var(--c),0 8px 24px rgba(0,0,0,.55);z-index:7}
+  .node.dim{opacity:.24;filter:saturate(.4);pointer-events:none}
+  .node.locked{opacity:.30;filter:grayscale(.7);pointer-events:none}
+  .node.locked .node__wk{color:var(--locked)}
+
+  /* ── Inspector ────────────────────────────────────────────── */
+  .panel{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 18px 20px;align-self:start;position:sticky;top:14px;min-height:320px;
+  }
+  .panel__hint{color:var(--dim);font-size:14px}
+  .panel__hint strong{color:var(--text);font-weight:600}
+  .p-eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .p-eyebrow .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .p-week{color:var(--dim)}
+  .panel h2{font-size:22px;margin:.35em 0 .5em;letter-spacing:-.01em;text-wrap:balance}
+  .p-usewhen{font-size:14.5px;margin:0 0 14px}
+  .p-usewhen .k{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:2px}
+  .panel ul{margin:0 0 16px;padding-left:18px}
+  .panel li{margin:3px 0;font-size:14px}
+  .badges{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+  .badge{--c:#30363d;font-family:var(--font-mono);font-size:11px;padding:3px 9px;border-radius:6px;
+         color:#fff;background:color-mix(in srgb,var(--c) 78%,#000);border:1px solid color-mix(in srgb,var(--c) 90%,#fff 4%)}
+  /* Library badges that lead somewhere (Library Reference, or Glossary as fallback) */
+  a.badge{text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s}
+  a.badge::after{content:" ↗";font-size:9px;opacity:.6}
+  a.badge:hover{background:color-mix(in srgb,var(--c) 92%,#000);border-color:#fff6;text-decoration:none}
+  a.badge:hover::after{opacity:1}
+  a.badge:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+  .p-div{height:1px;background:var(--border);margin:6px 0 15px}
+  .p-links{display:flex;flex-direction:column;gap:9px}
+  .link{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--bg);border:1px solid var(--border-2);border-radius:9px;
+    padding:11px 13px;font-size:14px;text-decoration:none;color:var(--text);
+    transition:border-color .15s,background .15s;
+  }
+  .link:hover{border-color:var(--root);background:var(--panel-2)}
+  .link:focus-visible{outline:2px solid var(--root);outline-offset:1px}
+  .link .k{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);display:block}
+  .link .v{font-weight:600}
+  .link .arrow{color:var(--dim)}
+  .link--todo{opacity:.6;cursor:default}
+  .link--todo:hover{border-color:var(--border-2);background:var(--bg)}
+  .link--todo .arrow{display:none}
+  .p-branchlist{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+  .p-branchlist button{
+    background:var(--bg);border:1px solid var(--border-2);border-radius:7px;color:var(--text);
+    font:inherit;font-size:12.5px;padding:5px 10px;cursor:pointer
+  }
+  .p-branchlist button:hover{border-color:var(--c)}
+  .p-branchlist button:focus-visible{outline:2px solid var(--c);outline-offset:1px}
+
+  /* Key terms → glossary */
+  .p-terms{display:flex;flex-wrap:wrap;gap:6px}
+  .termchip{display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--border-2);
+    border-radius:7px;color:var(--text);font-size:12.5px;padding:4px 9px;text-decoration:none;cursor:help;
+    transition:border-color .15s,background .15s}
+  .termchip::after{content:"↗";font-size:9px;color:var(--dim)}
+  .termchip:hover{border-color:var(--unsup);background:var(--panel-2)}
+  .termchip:focus-visible{outline:2px solid var(--unsup);outline-offset:1px}
+  .tip{position:absolute;z-index:80;max-width:280px;background:var(--panel-2);border:1px solid var(--border-2);
+    border-radius:8px;padding:9px 11px;font-size:13px;line-height:1.45;color:var(--text);
+    box-shadow:0 10px 30px rgba(0,0,0,.55);display:none;pointer-events:none}
+  .tip em{color:var(--dim);font-style:italic}
+
+  footer{margin-top:26px;color:var(--dim);font-size:12.5px;border-top:1px solid var(--border);padding-top:14px}
+  footer code{font-family:var(--font-mono);color:var(--text)}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div class="eyebrow">T-809-DATA · Data Mining &amp; Machine Learning</div>
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--dim)">
+        <a href="glossary.html" style="color:var(--dim);text-decoration:none">Glossary →</a>
+        <span style="opacity:.5"> · </span>
+        <a href="libraries.html" style="color:var(--dim);text-decoration:none">Libraries →</a>
+        <span style="opacity:.5"> · </span>
+        <a href="ai-tutor.html" style="color:var(--dim);text-decoration:none">Using AI →</a>
+      </div>
+    </div>
+    <h1>Model-Selection Skill Tree</h1>
+    <p>Which tool do you reach for? Start from the shape of your data and follow a branch.
+       Click any method for when to use it, what it assumes, the course page, and its assignment.</p>
+  </header>
+
+  <div class="controls">
+    <div class="ctl search">
+      <span class="lbl">Search</span>
+      <input id="search" type="search" placeholder="Find a method…" autocomplete="off" aria-label="Search methods">
+    </div>
+    <div class="ctl">
+      <span class="lbl">Data type</span>
+      <div class="chips" id="branchChips"></div>
+    </div>
+    <div class="ctl">
+      <span class="lbl">Library</span>
+      <div class="chips" id="libChips"></div>
+    </div>
+    <div class="ctl weekctl">
+      <span class="lbl">Reveal up to week</span>
+      <div class="row">
+        <input id="week" type="range" min="1" max="12" value="12" aria-label="Reveal methods up to week">
+        <output id="weekOut">all weeks</output>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="lbl" aria-hidden="true">&nbsp;</span>
+      <button class="btn-reset" id="reset" type="button">Reset view</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="graph-scroll">
+      <div class="graph" id="graph">
+        <svg class="edges" id="edges" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="nodes" id="nodes"></div>
+      </div>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite">
+      <p class="panel__hint"><strong>Select a method</strong> on the tree to see when to use it, what it
+        assumes, the libraries involved, its course page, and the assignment.</p>
+    </aside>
+  </div>
+
+  <footer>
+    Node data mirrors <code>skill_tree/tree.json</code>; colors mirror <code>skill_tree/render.py</code>.
+    Course-page and assignment links are set per week in the <code>WEEK_LINKS</code> block of this file.
+  </footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   EDIT THIS when your Canvas pages and (solution-free) assignments are live.
+   Leave a URL as "" to show a muted “link coming soon” placeholder.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const WEEK_LINKS = {
+  1:  {canvas:"", assignment:"", label:"Titanic — EDA & preprocessing"},
+  2:  {canvas:"", assignment:"", label:"AirPassengers — ARIMA forecasting"},
+  3:  {canvas:"", assignment:"", label:"California Housing + Iris"},
+  4:  {canvas:"", assignment:"", label:"Digits — SVM + grid search (cluster)"},
+  5:  {canvas:"", assignment:"", label:"Wine — trees & ensembles"},
+  6:  {canvas:"", assignment:"", label:"Adult Census — boosting + SHAP"},
+  7:  {canvas:"", assignment:"", label:"Iris — clustering + PCA"},
+  8:  {canvas:"", assignment:"", label:"MNIST — MLP (PyTorch)"},
+  9:  {canvas:"", assignment:"", label:"Fashion-MNIST — CNN + transfer (GPU)"},
+  10: {canvas:"", assignment:"", label:"IMDB — LSTM + DistilBERT"},
+};
+
+/* ─── Data (mirror of skill_tree/tree.json) ─────────────────────────────── */
+const DATA = {
+  nodes:[
+    {id:"root",label:"What is your\ndata?",week:0,branch:"root",kind:"header",position:[38,45.5]},
+    {id:"tab",label:"Tabular /\nStructured",week:1,branch:"tab",kind:"header",position:[12.5,40]},
+    {id:"ts",label:"Time Series",week:2,branch:"ts",kind:"header",position:[28,40]},
+    {id:"unsup",label:"Unlabelled Data",week:7,branch:"unsup",kind:"header",position:[40,40]},
+    {id:"img",label:"Images",week:9,branch:"img",kind:"header",position:[54,40]},
+    {id:"seq",label:"Text / Sequences",week:10,branch:"seq",kind:"header",position:[67,40]},
+    {id:"linreg",label:"Linear Regression",week:3,branch:"tab",position:[4,33],use_when:"Predict a continuous value",bullets:["Interpretable coefficients","Assumes linearity","Fast & scalable"],libraries:["sklearn"]},
+    {id:"logreg",label:"Logistic Regression",week:3,branch:"tab",position:[12.5,33],use_when:"Binary or multiclass classification",bullets:["Probabilistic output","Interpretable weights","Strong baseline"],libraries:["sklearn"]},
+    {id:"knn",label:"k-NN",week:3,branch:"tab",position:[21,33],use_when:"Non-parametric, instance-based tasks",bullets:["No training phase needed","Sensitive to scale & dims","Slow at inference"],libraries:["sklearn"]},
+    {id:"svm",label:"SVM",week:4,branch:"tab",position:[6,26],use_when:"High-dim or small-dataset classification",bullets:["Max-margin boundary","Kernel trick (RBF, poly)","Poor scaling to big N"],libraries:["sklearn"]},
+    {id:"tree",label:"Decision Tree",week:5,branch:"tab",position:[17,26],use_when:"Interpretable rule-based decisions",bullets:["Handles mixed types natively","Prone to overfitting","Fully visualisable"],libraries:["sklearn"]},
+    {id:"rf",label:"Random Forest",week:5,branch:"tab",position:[12.5,19],use_when:"Robust classification or regression",bullets:["Bagging reduces variance","Feature importance scores","Parallelisable"],libraries:["sklearn"]},
+    {id:"boost",label:"Gradient Boosting",week:6,branch:"tab",position:[21,19],use_when:"Best accuracy on structured data",bullets:["Boosting reduces bias","SHAP-interpretable","Tune n_estimators & lr"],libraries:["sklearn"]},
+    {id:"shap_node",label:"SHAP",week:6,branch:"shap_special",position:[38,12],use_when:"Explain any black-box model",bullets:["Model-agnostic","Local & global views","Pairs best with boosting"],libraries:["shap"]},
+    {id:"mlp",label:"MLP / Neural Net",week:8,branch:"tab",position:[4,19],use_when:"General learner for tabular tasks",bullets:["Flexible architecture","Needs careful tuning","Bridge to deep learning"],libraries:["pytorch"]},
+    {id:"arima",label:"ARIMA",week:2,branch:"ts",position:[28,33],use_when:"Forecast univariate stationary series",bullets:["AR + MA + differencing","Needs stationarity check","ACF/PACF for order"],libraries:["statsmodels"]},
+    {id:"lstm_ts",label:"LSTM  (for TS)",week:10,branch:"ts",position:[28,26],use_when:"Complex or multivariate series",bullets:["Captures long-range deps","Needs more data","See Sequences branch"],libraries:["pytorch"]},
+    {id:"kmeans",label:"K-Means Clustering",week:7,branch:"unsup",position:[36,33],use_when:"Partition data into k groups",bullets:["Fast and scalable","Assumes spherical clusters","Elbow / silhouette for k"],libraries:["sklearn"]},
+    {id:"dbscan",label:"DBSCAN",week:7,branch:"unsup",position:[44,33],use_when:"Arbitrary-shape clusters, noisy data",bullets:["No k to set","Detects outliers natively","Tune eps and min_samples"],libraries:["sklearn"]},
+    {id:"pca",label:"PCA",week:7,branch:"unsup",position:[40,26],use_when:"Reduce dims, visualise high-dim data",bullets:["Maximises explained variance","Linear transform only","Check scree plot"],libraries:["sklearn"]},
+    {id:"cnn",label:"CNN",week:9,branch:"img",position:[54,33],use_when:"Image classification or detection",bullets:["Learns spatial hierarchies","Data-hungry, GPU needed","Strong baseline"],libraries:["pytorch"]},
+    {id:"tl",label:"Transfer Learning",week:9,branch:"img",position:[54,26],use_when:"Image task with limited data",bullets:["Fine-tune pretrained backbone","Fast convergence","ResNet / EfficientNet"],libraries:["pytorch"]},
+    {id:"rnn",label:"RNN / LSTM",week:10,branch:"seq",position:[64,33],use_when:"Ordered sequences with temporal deps",bullets:["Hidden state carries memory","LSTM fixes vanishing grad","Good for short seqs"],libraries:["pytorch"]},
+    {id:"transformer",label:"Transformer",week:10,branch:"seq",position:[70,26],use_when:"NLP or long-range sequence tasks",bullets:["Self-attention, parallel training","State-of-the-art NLP","Fine-tune via HuggingFace"],libraries:["pytorch","huggingface"]},
+  ],
+  edges:[
+    ["root","tab"],["root","ts"],["root","unsup"],["root","img"],["root","seq"],
+    ["tab","linreg"],["tab","logreg"],["tab","knn"],["tab","svm"],["tab","tree"],["tab","mlp"],
+    ["tree","rf"],["tree","boost"],["boost","shap_node"],["rf","shap_node"],["mlp","shap_node"],
+    ["tl","shap_node"],["transformer","shap_node"],
+    ["ts","arima"],["arima","lstm_ts"],
+    ["unsup","kmeans"],["unsup","dbscan"],["unsup","pca"],
+    ["img","cnn"],["cnn","tl"],["seq","rnn"],["rnn","transformer"],
+  ],
+};
+
+const BRANCH = {root:"#58a6ff",tab:"#3fb950",ts:"#f78166",unsup:"#2dd4bf",img:"#bc8cff",seq:"#ffa657",shap_special:"#e3b341"};
+const LIBCOLOR = {sklearn:"#1f6feb",statsmodels:"#2d6a9f",xgboost:"#b08000",lightgbm:"#2e7d32",catboost:"#b85c00",pytorch:"#b93221",huggingface:"#b07300",shap:"#276e27"};
+const LIBLABEL = {sklearn:"scikit-learn",statsmodels:"statsmodels",xgboost:"XGBoost",lightgbm:"LightGBM",catboost:"CatBoost",pytorch:"PyTorch",huggingface:"HuggingFace",shap:"SHAP"};
+/* Library badge → its card in the Library Reference (libraries.html#<card id>).
+   Libraries with no card (XGBoost, LightGBM, CatBoost are not in the course
+   environment) fall back to their glossary definition in badgesHtml(). */
+const LIBPAGE = {sklearn:"sklearn",statsmodels:"statsmodels",shap:"shap",pytorch:"torch",huggingface:"transformers"};
+const BRANCH_ORDER = ["tab","ts","unsup","img","seq"];
+const BRANCH_LABEL = {tab:"Tabular",ts:"Time Series",unsup:"Unlabelled",img:"Images",seq:"Sequences"};
+const BRANCH_DESC = {
+  root:"Every model choice starts here: what does your data look like? Pick a branch.",
+  tab:"Rows and columns — the workhorse of applied ML. Start simple; add complexity only when it pays.",
+  ts:"Observations ordered in time. The IID assumption breaks, so never shuffle.",
+  unsup:"No labels. Find structure — group similar points, or compress dimensions.",
+  img:"Pixels with spatial structure. Convolutions, then pretrained backbones.",
+  seq:"Text and ordered sequences. From recurrence to attention.",
+};
+
+/* Key glossary terms per method node (values are glossary slugs = glossary.html#<slug>). */
+const NODE_TERMS = {
+  linreg:["ordinary-least-squares","ridge-regression","lasso","bias-variance-tradeoff"],
+  logreg:["sigmoid","cross-entropy","decision-boundary","softmax"],
+  knn:["distance-metric","curse-of-dimensionality","feature-scaling"],
+  svm:["margin","support-vector","kernel-trick","rbf-kernel","hyperplane","c-parameter"],
+  tree:["gini-impurity","entropy","information-gain","pruning","overfitting"],
+  rf:["bagging","bootstrap","out-of-bag-error","feature-importance"],
+  boost:["boosting","gradient-boosting","weak-learner","learning-rate","xgboost","lightgbm","catboost"],
+  shap_node:["shap","feature-importance"],
+  mlp:["neural-network","multilayer-perceptron","activation-function","backpropagation","gradient-descent","forward-pass"],
+  arima:["stationarity","differencing","autocorrelation-acf","partial-autocorrelation-pacf","sarima","white-noise"],
+  lstm_ts:["lstm","recurrent-neural-network","hidden-state","vanishing-gradient"],
+  kmeans:["clustering","centroid","inertia","elbow-method","silhouette-score"],
+  dbscan:["clustering","silhouette-score","hierarchical-clustering"],
+  pca:["principal-component","explained-variance","covariance","feature-extraction","curse-of-dimensionality"],
+  cnn:["convolution","feature-map","pooling","parameter-sharing","skip-connection","data-augmentation"],
+  tl:["transfer-learning","fine-tuning","pretrained-model","backbone"],
+  rnn:["recurrent-neural-network","hidden-state","lstm","gru","vanishing-gradient","sequence-to-sequence"],
+  transformer:["self-attention","attention","query-key-value","multi-head-attention","positional-encoding","transformer","bert","gpt","tokenization","embedding"],
+};
+
+/* slug -> {name, def}. Auto-generated from glossary.html (see gen_gloss.py). Do not hand-edit. */
+const GLOSS = {"activation-function": {"name": "Activation function", "def": "The non-linearity applied at each neuron (sigmoid, tanh, ReLU); without it, stacked layers collapse to a linear model."}, "attention": {"name": "Attention", "def": "Letting a model look at all input positions, weighted by relevance, instead of one fixed summary vector. Weights are interpretable."}, "autocorrelation-acf": {"name": "Autocorrelation (ACF)", "def": "Correlation of a series with lagged copies of itself; the ACF plot helps identify MA order."}, "backbone": {"name": "Backbone", "def": "The pretrained feature-extracting body of a network, to which you attach a new task-specific head."}, "backpropagation": {"name": "Backpropagation", "def": "The algorithm that computes loss gradients by applying the chain rule backward through the network — same cost as the forward pass."}, "bagging": {"name": "Bagging", "def": "Training models in parallel on bootstrap resamples and averaging; reduces variance. Basis of the random forest."}, "bert": {"name": "BERT", "def": "An encoder-only transformer pretrained by masked-language modeling; fine-tuned for understanding tasks (classification, QA)."}, "bias-variance-tradeoff": {"name": "Bias–variance tradeoff", "def": "Expected error = bias² + variance + irreducible noise. Simpler models have more bias; complex ones more variance. The central tension of ML."}, "boosting": {"name": "Boosting", "def": "Training weak learners sequentially, each correcting the last's errors; reduces bias. Can overfit, so watch validation loss."}, "bootstrap": {"name": "Bootstrap", "def": "Sampling a dataset of the same size with replacement; ~37% of rows are left out (the out-of-bag set)."}, "c-parameter": {"name": "C parameter", "def": "An SVM's regularization knob: large C penalizes margin violations (low bias, high variance), small C allows them."}, "catboost": {"name": "CatBoost", "def": "A gradient-boosting library with native, leakage-aware handling of categorical features."}, "centroid": {"name": "Centroid", "def": "The mean point of a cluster; K-means represents each cluster by its centroid."}, "clustering": {"name": "Clustering", "def": "Grouping similar points without labels — for segmentation, anomaly detection, or exploration."}, "convolution": {"name": "Convolution", "def": "Sliding a small learnable kernel over an input and taking dot products to produce a feature map."}, "covariance": {"name": "Covariance", "def": "Unnormalized co-variation of two variables; its matrix underlies PCA."}, "cross-entropy": {"name": "Cross-entropy", "def": "The standard classification loss; measures the gap between predicted and true class distributions."}, "curse-of-dimensionality": {"name": "Curse of dimensionality", "def": "In high dimensions distances concentrate and data becomes sparse, so models overfit — motivating dimensionality reduction."}, "data-augmentation": {"name": "Data augmentation", "def": "Expanding the training set with label-preserving transforms (crops, flips, color jitter); standard for vision."}, "decision-boundary": {"name": "Decision boundary", "def": "The surface in feature space where a classifier switches its predicted class."}, "differencing": {"name": "Differencing", "def": "Subtracting consecutive (or seasonal) values to remove trend/seasonality and reach stationarity — the “I” in ARIMA."}, "distance-metric": {"name": "Distance metric", "def": "How “closeness” is measured — Euclidean (default), Manhattan, or cosine (for text/high-dim sparse data)."}, "elbow-method": {"name": "Elbow method", "def": "Choosing K by plotting inertia vs K and looking for the “elbow” where gains level off. Often no clean elbow exists."}, "embedding": {"name": "Embedding", "def": "A learned dense vector representing a token (or item), placing similar things near each other."}, "entropy": {"name": "Entropy", "def": "An information-theoretic measure of node impurity; alternative to Gini for choosing tree splits."}, "explained-variance": {"name": "Explained variance", "def": "The share of total variance captured by each principal component; the scree plot shows how many to keep."}, "feature-extraction": {"name": "Feature extraction", "def": "Building new features from combinations of originals (PCA components, embeddings)."}, "feature-importance": {"name": "Feature importance", "def": "How much each feature contributes to a model — via impurity decrease (biased) or permutation (more reliable)."}, "feature-map": {"name": "Feature map", "def": "The output of one convolutional filter — a map of where that pattern was detected."}, "feature-scaling": {"name": "Feature scaling", "def": "Transforming feature ranges so no column dominates by magnitude; required by distance- and gradient-based methods."}, "fine-tuning": {"name": "Fine-tuning", "def": "Continuing training a pretrained model on a new task — either just the head (feature extraction) or the whole model at a small LR."}, "forward-pass": {"name": "Forward pass", "def": "Evaluating a network from inputs to output: alternating matrix multiplications and activations."}, "gini-impurity": {"name": "Gini impurity", "def": "A measure of class mixing at a tree node; splits are chosen to reduce it (or entropy) the most."}, "gpt": {"name": "GPT", "def": "A decoder-only transformer pretrained by next-token prediction; the generative family behind modern LLMs."}, "gradient-boosting": {"name": "Gradient boosting", "def": "Boosting that fits each new tree to the residuals (negative gradient of the loss) of the current ensemble."}, "gradient-descent": {"name": "Gradient descent", "def": "Iterative optimization: compute the gradient of the loss w.r.t. parameters and step in the negative direction."}, "gru": {"name": "GRU", "def": "Gated Recurrent Unit: a simpler LSTM with two gates and similar performance."}, "hidden-state": {"name": "Hidden state", "def": "An RNN's running memory, updated at each time step from the input and the previous state."}, "hierarchical-clustering": {"name": "Hierarchical clustering", "def": "Building a tree of nested clusters (agglomerative or divisive), visualized as a dendrogram and cut at a chosen height."}, "hyperplane": {"name": "Hyperplane", "def": "A flat (linear) decision surface in feature space — a line in 2-D, a plane in 3-D, and so on."}, "inertia": {"name": "Inertia", "def": "Within-cluster sum of squared distances to centroids; what K-means minimizes and the elbow method plots."}, "information-gain": {"name": "Information gain", "def": "The drop in impurity from a split (parent impurity minus weighted child impurity) — the engine of tree growth."}, "kernel-trick": {"name": "Kernel trick", "def": "Computing inner products in a high-dimensional feature space without ever forming it — lets linear methods draw non-linear boundaries."}, "lasso": {"name": "Lasso", "def": "Linear regression with an L1 penalty; drives some coefficients to exactly zero, doing feature selection."}, "learning-rate": {"name": "Learning rate", "def": "In boosting, how much each new tree contributes; small rate + many trees is the standard recipe. (In NNs, the gradient-descent step size.)"}, "lightgbm": {"name": "LightGBM", "def": "A gradient-boosting library using leaf-wise growth and histogram splits; fastest of the three on large data."}, "lstm": {"name": "LSTM", "def": "Long Short-Term Memory: an RNN with a gated cell state that flows through time, solving the vanishing-gradient problem."}, "margin": {"name": "Margin", "def": "The gap between an SVM's boundary and the nearest points; SVMs maximize it. “Soft” margins allow violations via the C parameter."}, "multi-head-attention": {"name": "Multi-head attention", "def": "Running self-attention several times in parallel with different projections, so each head can specialize."}, "multilayer-perceptron": {"name": "Multilayer perceptron", "def": "A feedforward net of fully-connected layers with non-linear activations; a universal approximator in principle."}, "neural-network": {"name": "Neural network", "def": "A model of layers of connected artificial neurons; the umbrella covering MLPs, CNNs, RNNs, and transformers."}, "ordinary-least-squares": {"name": "Ordinary least squares", "def": "The method behind linear regression: choose coefficients that minimize the sum of squared residuals."}, "out-of-bag-error": {"name": "Out-of-bag error", "def": "A free validation estimate from the rows each bootstrap sample left out."}, "overfitting": {"name": "Overfitting", "def": "Fitting the training data (including its noise) so closely that test performance suffers. Low train error, high test error."}, "parameter-sharing": {"name": "Parameter sharing", "def": "Reusing the same kernel weights across all positions — why CNNs need far fewer parameters than MLPs on images."}, "partial-autocorrelation-pacf": {"name": "Partial autocorrelation (PACF)", "def": "Correlation at a lag after removing shorter-lag effects; the PACF plot helps identify AR order."}, "pooling": {"name": "Pooling", "def": "Downsampling feature maps (max or average) to shrink them and add small-translation invariance."}, "positional-encoding": {"name": "Positional encoding", "def": "Position information injected into token embeddings, since self-attention is otherwise order-blind."}, "pretrained-model": {"name": "Pretrained model", "def": "A model already trained on a large corpus (ImageNet CNNs, BERT) that you adapt rather than train from scratch."}, "principal-component": {"name": "Principal component", "def": "An eigenvector of the covariance matrix — a new axis that is a linear combination of original features."}, "pruning": {"name": "Pruning", "def": "Limiting tree complexity to curb overfitting — pre-pruning (stop early) or post-pruning (grow then cut back)."}, "query-key-value": {"name": "Query, Key, Value", "def": "The three projections of attention: a query is matched against keys to weight the corresponding values. The core abstraction of transformers."}, "rbf-kernel": {"name": "RBF kernel", "def": "The most common SVM kernel, K(x,x′)=exp(−γ‖x−x′‖²); γ controls boundary wiggliness (bias–variance)."}, "recurrent-neural-network": {"name": "Recurrent neural network", "def": "A network that processes a sequence step by step, carrying a hidden state as memory. Trained by backpropagation through time."}, "ridge-regression": {"name": "Ridge regression", "def": "Linear regression with an L2 penalty on coefficients; shrinks them smoothly toward zero."}, "sarima": {"name": "SARIMA", "def": "Seasonal ARIMA — adds seasonal AR/I/MA terms for series with a repeating period."}, "self-attention": {"name": "Self-attention", "def": "Attention where queries, keys, and values all come from the same sequence — each token attends to every other, in parallel."}, "sequence-to-sequence": {"name": "Sequence-to-sequence", "def": "An encoder reads an input sequence into a representation; a decoder generates an output sequence. Its bottleneck motivated attention."}, "shap": {"name": "SHAP", "def": "A game-theoretic method that fairly attributes each prediction to its features, with local + global views and axiomatic guarantees."}, "sigmoid": {"name": "Sigmoid", "def": "The S-shaped function σ(z)=1/(1+e⁻ᶻ) mapping any real number to (0, 1); used for probabilities and as an activation."}, "silhouette-score": {"name": "Silhouette score", "def": "How well each point fits its cluster vs the nearest other cluster (−1 to 1); a more reliable K-selection guide than the elbow."}, "skip-connection": {"name": "Skip connection", "def": "An identity shortcut that adds a layer's input to its output (ResNet), letting very deep networks train."}, "softmax": {"name": "Softmax", "def": "Generalizes the sigmoid to multiple classes: turns a vector of scores into a probability distribution."}, "stationarity": {"name": "Stationarity", "def": "A series whose statistical properties (mean, variance, autocovariance) don't change over time. ARIMA assumes it."}, "support-vector": {"name": "Support vector", "def": "The few training points that touch (or violate) the margin and alone determine an SVM's boundary."}, "tokenization": {"name": "Tokenization", "def": "Splitting text into tokens (often subwords) and mapping them to IDs before embedding."}, "transfer-learning": {"name": "Transfer learning", "def": "Reusing a model pretrained on a large dataset and fine-tuning it on yours; beats training from scratch on small data."}, "transformer": {"name": "Transformer", "def": "An architecture built entirely on self-attention (no recurrence): multi-head attention + feed-forward, with residuals and layer norm. Behind modern LLMs."}, "vanishing-gradient": {"name": "Vanishing gradient", "def": "Gradients shrinking toward zero through many layers/time steps, stalling learning; mitigated by ReLU, skip connections, LSTMs."}, "weak-learner": {"name": "Weak learner", "def": "A model only slightly better than chance (typically a shallow tree/stump); boosting combines many into a strong one."}, "white-noise": {"name": "White noise", "def": "A series with no autocorrelation — the ideal residual of a good time-series model."}, "xgboost": {"name": "XGBoost", "def": "A fast, regularized gradient-boosting library; long the default for tabular competitions."}};
+
+const byId = Object.fromEntries(DATA.nodes.map(n=>[n.id,n]));
+const SVGNS="http://www.w3.org/2000/svg";
+const nodesLayer=document.getElementById("nodes");
+const edgesSvg=document.getElementById("edges");
+const panel=document.getElementById("panel");
+const graphEl=document.getElementById("graph");
+
+/* Map to the actual content bounding box (not the full 76×52 canvas) so the
+   graph fills its container with no dead margins, and size the box to match. */
+const _ys=DATA.nodes.map(n=>n.position[1]);
+const PADY=3, X0=0, X1=76, Y0=Math.min(..._ys)-PADY, Y1=Math.max(..._ys)+PADY;
+const px=x=>(x-X0)/(X1-X0)*100;       // → 0..100 (matches node left %)
+const py=y=>(Y1-y)/(Y1-Y0)*100;       // → 0..100, y up
+graphEl.style.aspectRatio=(X1-X0)/(Y1-Y0);
+
+const state={branches:new Set(BRANCH_ORDER),libs:new Set(),week:12,q:"",selected:null};
+
+/* ─── Build edges ─────────────────────────────────────────────────────── */
+const edgeEls=[];
+DATA.edges.forEach(([a,b])=>{
+  const na=byId[a],nb=byId[b];
+  const shap=(a==="shap_node"||b==="shap_node");
+  const branch=shap?"shap_special":nb.branch;
+  const ln=document.createElementNS(SVGNS,"line");
+  ln.setAttribute("x1",px(na.position[0])); ln.setAttribute("y1",py(na.position[1]));
+  ln.setAttribute("x2",px(nb.position[0])); ln.setAttribute("y2",py(nb.position[1]));
+  ln.setAttribute("class","edge");
+  ln.style.setProperty("--c",BRANCH[branch]);
+  ln.dataset.from=a; ln.dataset.to=b;
+  edgesSvg.appendChild(ln); edgeEls.push(ln);
+});
+
+/* ─── Build nodes ─────────────────────────────────────────────────────── */
+const nodeEls={};
+DATA.nodes.forEach(n=>{
+  const el=document.createElement("button");
+  el.type="button";
+  el.className="node"+(n.kind==="header"?" node--header":"")+(n.branch==="root"?" node--root":"");
+  el.style.left=px(n.position[0])+"%";
+  el.style.top=py(n.position[1])+"%";
+  el.style.setProperty("--c",BRANCH[n.branch]);
+  el.dataset.id=n.id;
+  const wk=(n.kind==="header"||n.branch==="root")?"":`<span class="node__wk">W${n.week}</span>`;
+  el.innerHTML=wk+`<span>${n.label.replace(/\n/g,"<br>")}</span>`;
+  el.setAttribute("aria-label",n.label.replace(/\n/g," ")+(n.kind==="header"?" — branch":` — week ${n.week}`));
+  el.addEventListener("click",()=>select(n.id));
+  el.addEventListener("mouseenter",()=>hover(n.id,true));
+  el.addEventListener("mouseleave",()=>hover(n.id,false));
+  el.addEventListener("focus",()=>hover(n.id,true));
+  el.addEventListener("blur",()=>hover(n.id,false));
+  nodesLayer.appendChild(el); nodeEls[n.id]=el;
+});
+
+function neighborsOf(id){
+  const s=new Set();
+  DATA.edges.forEach(([a,b])=>{ if(a===id)s.add(b); if(b===id)s.add(a); });
+  return s;
+}
+function edgesOf(id){ return edgeEls.filter(e=>e.dataset.from===id||e.dataset.to===id); }
+
+/* ─── Hover highlight (skips when a node is pinned via selection) ──────── */
+let hovering=null;
+function hover(id,on){
+  hovering=on?id:null;
+  paintHighlight();
+}
+function paintHighlight(){
+  const focusId=hovering||state.selected;
+  const near=focusId?neighborsOf(focusId):new Set();
+  DATA.nodes.forEach(n=>{
+    const el=nodeEls[n.id];
+    el.classList.toggle("hot",n.id===focusId);
+    el.classList.toggle("near",focusId&&near.has(n.id));
+  });
+  const hotEdges=focusId?new Set(edgesOf(focusId)):new Set();
+  edgeEls.forEach(e=>{
+    const active=!e.classList.contains("faded");
+    e.classList.toggle("hot",active&&hotEdges.has(e));
+    e.classList.toggle("dim",focusId&&active&&!hotEdges.has(e));
+  });
+}
+
+/* ─── Filters ─────────────────────────────────────────────────────────── */
+function passes(n){
+  const branchOK = n.branch==="root"||n.branch==="shap_special"||state.branches.has(n.branch);
+  const libs = n.libraries||[];
+  const libOK = state.libs.size===0 || libs.length===0 || libs.some(l=>state.libs.has(l));
+  const weekOK = n.week<=state.week;
+  const q=state.q.trim().toLowerCase();
+  const searchOK = q==="" || n.label.toLowerCase().includes(q) || (n.use_when||"").toLowerCase().includes(q);
+  return {branchOK,libOK,weekOK,searchOK,
+          shown: branchOK&&libOK&&searchOK,      // passes non-week filters
+          active: branchOK&&libOK&&searchOK&&weekOK};
+}
+function applyFilters(){
+  DATA.nodes.forEach(n=>{
+    const el=nodeEls[n.id], p=passes(n);
+    const locked = p.shown && !p.weekOK;         // filtered-in but not yet revealed
+    const dim = !p.shown && !locked;
+    el.classList.toggle("locked",locked);
+    el.classList.toggle("dim",dim);
+  });
+  edgeEls.forEach(e=>{
+    const na=nodeEls[e.dataset.from], nb=nodeEls[e.dataset.to];
+    const faded = na.classList.contains("dim")||nb.classList.contains("dim")
+               || na.classList.contains("locked")||nb.classList.contains("locked");
+    e.classList.toggle("faded",faded);
+    if(faded){ e.classList.remove("hot"); e.classList.remove("dim"); }
+  });
+  // if the selected node became hidden, clear the inspector highlight (keep panel)
+  if(state.selected){
+    const el=nodeEls[state.selected];
+    if(el.classList.contains("dim")||el.classList.contains("locked")) { /* keep panel, drop ring */ }
+  }
+  paintHighlight();
+}
+
+/* ─── Inspector panel ─────────────────────────────────────────────────── */
+function linkRow(kind,label,url){
+  if(url){
+    return `<a class="link" href="${url}" target="_blank" rel="noopener">
+      <span><span class="k">${kind}</span><span class="v">${label}</span></span>
+      <span class="arrow">↗</span></a>`;
+  }
+  return `<span class="link link--todo">
+      <span><span class="k">${kind}</span><span class="v">${label} · link coming soon</span></span></span>`;
+}
+function badgesHtml(libs){
+  return (libs||[]).map(l=>{
+    const label=LIBLABEL[l]||l, style=`--c:${LIBCOLOR[l]}`;
+    if(LIBPAGE[l])
+      return `<a class="badge" style="${style}" href="libraries.html#${LIBPAGE[l]}"
+         target="_blank" rel="noopener" title="${label} in the Library Reference">${label}</a>`;
+    if(GLOSS[l])
+      return `<a class="badge" style="${style}" href="glossary.html#${l}"
+         target="_blank" rel="noopener" title="${label} in the Glossary">${label}</a>`;
+    return `<span class="badge" style="${style}">${label}</span>`;
+  }).join("");
+}
+function termsHtml(id){
+  const ts=(NODE_TERMS[id]||[]).filter(s=>GLOSS[s]);
+  if(!ts.length) return "";
+  return `<div class="p-div"></div>
+    <div class="p-eyebrow" style="margin-bottom:8px"><span>Key terms</span></div>
+    <div class="p-terms">${ts.map(s=>`<a class="termchip" data-slug="${s}" href="glossary.html#${s}" target="_blank" rel="noopener">${GLOSS[s].name}</a>`).join("")}</div>`;
+}
+function select(id){
+  hideTip();
+  state.selected=id;
+  DATA.nodes.forEach(n=>nodeEls[n.id].classList.toggle("selected",n.id===id));
+  const n=byId[id];
+  const c=BRANCH[n.branch];
+
+  if(n.kind==="header"||n.branch==="root"){
+    const kids=DATA.edges.filter(([a])=>a===id).map(([,b])=>b)
+                 .filter(cid=>byId[cid].kind!=="header");
+    const chips = (n.branch==="root")
+      ? BRANCH_ORDER.map(b=>byId[b]).map(h=>`<button style="--c:${BRANCH[h.branch]}" onclick="select('${h.id}')">${h.label.replace(/\n/g," ")}</button>`).join("")
+      : kids.map(cid=>{const k=byId[cid];return `<button style="--c:${BRANCH[k.branch]}" onclick="select('${cid}')">${k.label.replace(/\n/g," ")}</button>`;}).join("");
+    panel.innerHTML=`
+      <div class="p-eyebrow"><span class="dot" style="background:${c}"></span><span>${n.branch==="root"?"Start here":BRANCH_LABEL[n.branch]||n.label.replace(/\n/g," ")}</span></div>
+      <h2>${n.label.replace(/\n/g," ")}</h2>
+      <p class="p-usewhen">${BRANCH_DESC[n.branch]||""}</p>
+      <div class="p-div"></div>
+      <div class="p-eyebrow" style="margin-bottom:10px"><span>${n.branch==="root"?"Branches":"Methods in this branch"}</span></div>
+      <div class="p-branchlist">${chips}</div>`;
+    paintHighlight(); return;
+  }
+
+  const L=WEEK_LINKS[n.week]||{};
+  const badges=badgesHtml(n.libraries);
+  panel.innerHTML=`
+    <div class="p-eyebrow">
+      <span class="dot" style="background:${c}"></span>
+      <span>${BRANCH_LABEL[n.branch]||n.branch}</span>
+      <span class="p-week">· Week ${n.week}</span>
+    </div>
+    <h2>${n.label.replace(/\n/g," ")}</h2>
+    <p class="p-usewhen"><span class="k">Use when</span>${n.use_when||""}</p>
+    <ul>${(n.bullets||[]).map(b=>`<li>${b}</li>`).join("")}</ul>
+    ${badges?`<div class="badges">${badges}</div>`:""}
+    <div class="p-div"></div>
+    <div class="p-links">
+      ${linkRow("Course page","Week "+n.week+" overview",L.canvas)}
+      ${linkRow("Assignment",L.label||("Week "+n.week+" exercise"),L.assignment)}
+    </div>
+    ${termsHtml(id)}`;
+  paintHighlight();
+}
+
+/* ─── Controls ────────────────────────────────────────────────────────── */
+const branchChips=document.getElementById("branchChips");
+BRANCH_ORDER.forEach(b=>{
+  const c=document.createElement("button");
+  c.className="chip"; c.type="button"; c.style.setProperty("--c",BRANCH[b]);
+  c.setAttribute("aria-pressed","true"); c.textContent=BRANCH_LABEL[b];
+  c.addEventListener("click",()=>{
+    if(state.branches.has(b))state.branches.delete(b); else state.branches.add(b);
+    c.setAttribute("aria-pressed",state.branches.has(b));
+    applyFilters();
+  });
+  branchChips.appendChild(c);
+});
+const libChips=document.getElementById("libChips");
+/* Only offer filters for libraries some node actually uses, so no chip can
+   filter the tree down to nothing. */
+const USED_LIBS=Object.keys(LIBCOLOR).filter(l=>DATA.nodes.some(n=>(n.libraries||[]).includes(l)));
+USED_LIBS.forEach(l=>{
+  const c=document.createElement("button");
+  c.className="chip"; c.type="button"; c.style.setProperty("--c",LIBCOLOR[l]);
+  c.setAttribute("aria-pressed","false"); c.textContent=LIBLABEL[l];
+  c.addEventListener("click",()=>{
+    if(state.libs.has(l))state.libs.delete(l); else state.libs.add(l);
+    c.setAttribute("aria-pressed",state.libs.has(l));
+    applyFilters();
+  });
+  libChips.appendChild(c);
+});
+const weekIn=document.getElementById("week"), weekOut=document.getElementById("weekOut");
+weekIn.addEventListener("input",()=>{
+  state.week=+weekIn.value;
+  weekOut.textContent = state.week>=12 ? "all weeks" : ("weeks 1–"+state.week);
+  applyFilters();
+});
+const searchIn=document.getElementById("search");
+searchIn.addEventListener("input",()=>{ state.q=searchIn.value; applyFilters(); });
+document.getElementById("reset").addEventListener("click",()=>{
+  state.branches=new Set(BRANCH_ORDER); state.libs.clear(); state.week=12; state.q="";
+  searchIn.value=""; weekIn.value=12; weekOut.textContent="all weeks";
+  [...branchChips.children].forEach(c=>c.setAttribute("aria-pressed","true"));
+  [...libChips.children].forEach(c=>c.setAttribute("aria-pressed","false"));
+  applyFilters();
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ hovering=null; hideTip(); paintHighlight(); }});
+
+/* Key-term tooltips: definition on hover/focus; click opens the glossary anchor. */
+const tipEl=document.createElement("div"); tipEl.className="tip"; tipEl.setAttribute("role","tooltip");
+document.body.appendChild(tipEl);
+function showTip(chip){
+  const g=GLOSS[chip.dataset.slug]; if(!g) return;
+  tipEl.innerHTML=g.def; tipEl.style.display="block";
+  const r=chip.getBoundingClientRect(), t=tipEl.getBoundingClientRect();
+  let top=r.top-t.height-8; if(top<6) top=r.bottom+8;
+  const left=Math.max(8,Math.min(r.left+r.width/2-t.width/2, window.innerWidth-t.width-8));
+  tipEl.style.top=(top+window.scrollY)+"px"; tipEl.style.left=(left+window.scrollX)+"px";
+}
+function hideTip(){ tipEl.style.display="none"; }
+["mouseover","focusin"].forEach(ev=>panel.addEventListener(ev,e=>{
+  const c=e.target.closest&&e.target.closest(".termchip"); if(c) showTip(c);
+}));
+["mouseout","focusout"].forEach(ev=>panel.addEventListener(ev,e=>{
+  const c=e.target.closest&&e.target.closest(".termchip"); if(c) hideTip();
+}));
+
+applyFilters();
+</script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+%% exercise_style.tex — Shared LaTeX macros for DMML exercises
+%% Input with: \input{../common/exercise_style.tex}
+
+%% ─── Packages ────────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{mdframed}
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{fontawesome5}
+
+%% ─── Page layout ─────────────────────────────────────────────────────────────
+\geometry{a4paper, top=25mm, bottom=25mm, left=25mm, right=25mm}
+
+%% ─── Color palette ───────────────────────────────────────────────────────────
+\definecolor{ruBlue}{RGB}{0, 71, 133}
+\definecolor{ruGold}{RGB}{255, 183, 27}
+\definecolor{challengeGray}{RGB}{110, 110, 110}
+\definecolor{selfcheckGreen}{RGB}{34, 139, 34}
+\definecolor{datasetPurple}{RGB}{100, 60, 160}
+\definecolor{codeBackground}{RGB}{248, 248, 248}
+\definecolor{warningRed}{RGB}{180, 40, 40}
+
+%% ─── Header / footer ─────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{ruBlue}{\textbf{DMML} — Data Mining \& Machine Learning}}
+\fancyhead[R]{\small\textcolor{ruBlue}{Reykjavik University}}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+%% ─── Listings (code blocks) ──────────────────────────────────────────────────
+\lstset{
+  language=Python,
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{codeBackground},
+  frame=single,
+  framesep=4pt,
+  rulecolor=\color{ruBlue!30},
+  keywordstyle=\color{ruBlue}\bfseries,
+  stringstyle=\color{selfcheckGreen},
+  commentstyle=\color{challengeGray}\itshape,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=4,
+  numbers=left,
+  numberstyle=\tiny\color{challengeGray},
+  numbersep=8pt,
+  xleftmargin=15pt,
+  captionpos=b,
+}
+
+%% ─── \exerciseheader{week}{title}{due}{time} ─────────────────────────────────
+\newcommand{\exerciseheader}[4]{%
+  \begin{tikzpicture}
+    \node[
+      fill=ruBlue,
+      text=white,
+      inner sep=12pt,
+      rounded corners=4pt,
+      text width=\linewidth-24pt,
+      align=left,
+    ] {
+      {\large\bfseries #1 \quad\textbar\quad #2}\\[4pt]
+      {\small \faCalendar[regular]\ \ Due: \textbf{#3}%
+        \qquad\faClock[regular]\ \ Estimated time: \textbf{#4}}
+    };
+  \end{tikzpicture}
+  \vspace{6pt}
+}
+
+%% ─── requiredoutput environment — amber box ──────────────────────────────────
+\newenvironment{requiredoutput}{%
+  \begin{mdframed}[
+    backgroundcolor=ruGold!20,
+    linecolor=ruGold,
+    linewidth=1.5pt,
+    innerleftmargin=10pt,
+    innerrightmargin=10pt,
+    innertopmargin=8pt,
+    innerbottommargin=8pt,
+    roundcorner=4pt,
+  ]
+  \textcolor{ruGold!70!black}{\faExclamationTriangle\ \textbf{Required Outputs}}\\[4pt]
+}{%
+  \end{mdframed}
+}
+
+%% ─── challenge environment ───────────────────────────────────────────────────
+\newenvironment{challenge}{%
+  \begin{mdframed}[
+    backgroundcolor=challengeGray!8,
+    linecolor=challengeGray!50,
+    linewidth=1pt,
+    innerleftmargin=10pt,
+    innerrightmargin=10pt,
+    innertopmargin=8pt,
+    innerbottommargin=8pt,
+    roundcorner=4pt,
+  ]
+  \textcolor{challengeGray}{\faStar\ \textbf{Challenge (Optional)} --- does not affect base grade}\\[4pt]
+}{%
+  \end{mdframed}
+}
+
+%% ─── datasetbox environment ──────────────────────────────────────────────────
+\newenvironment{datasetbox}{%
+  \begin{mdframed}[
+    backgroundcolor=datasetPurple!8,
+    linecolor=datasetPurple!60,
+    linewidth=1pt,
+    innerleftmargin=10pt,
+    innerrightmargin=10pt,
+    innertopmargin=8pt,
+    innerbottommargin=8pt,
+    roundcorner=4pt,
+  ]
+  \textcolor{datasetPurple}{\faDatabase\ \textbf{Dataset}}\\[4pt]
+}{%
+  \end{mdframed}
+}
+
+%% ─── selfcheck environment ───────────────────────────────────────────────────
+\newenvironment{selfcheck}{%
+  \begin{mdframed}[
+    backgroundcolor=selfcheckGreen!8,
+    linecolor=selfcheckGreen!60,
+    linewidth=1pt,
+    innerleftmargin=10pt,
+    innerrightmargin=10pt,
+    innertopmargin=8pt,
+    innerbottommargin=8pt,
+    roundcorner=4pt,
+  ]
+  \textcolor{selfcheckGreen}{\faCheckCircle\ \textbf{Self-Check Assertions}}\\[4pt]
+}{%
+  \end{mdframed}
+}
+
+%% ─── warningbox environment ──────────────────────────────────────────────────
+\newenvironment{warningbox}{%
+  \begin{mdframed}[
+    backgroundcolor=warningRed!8,
+    linecolor=warningRed!60,
+    linewidth=1pt,
+    innerleftmargin=10pt,
+    innerrightmargin=10pt,
+    innertopmargin=8pt,
+    innerbottommargin=8pt,
+    roundcorner=4pt,
+  ]
+  \textcolor{warningRed}{\faExclamationCircle\ \textbf{Common Mistake --- Read Carefully}}\\[4pt]
+}{%
+  \end{mdframed}
+}
+
+%% ─── Task counter ────────────────────────────────────────────────────────────
+\newcounter{taskcounter}
+\newcommand{\task}[2][]{%
+  \stepcounter{taskcounter}%
+  \subsubsection*{\textcolor{ruBlue}{Task \thetaskcounter%
+    \ifx&#1&\else\ ---\ #1\fi}%
+    \hfill\textcolor{ruBlue!60}{\small[#2\,pts]}}%
+}
+\newcommand{\resettasks}{\setcounter{taskcounter}{0}}
+
+%% ─── Hyperref ────────────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=ruBlue,
+  urlcolor=ruBlue,
+  citecolor=ruBlue,
+}

@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DMML — Library Reference</title>
+<meta name="description" content="Every library used in the Data Mining & Machine Learning course: what it is, how it thinks, where its documentation lives, and the functions you will actually call.">
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel-2:#1c2128;
+    --border:#21262d; --border-2:#30363d;
+    --text:#e6edf3; --dim:#8b949e; --gold:#e3b341;
+    --core:#58a6ff; --viz:#bc8cff; --ml:#2dd4bf; --stats:#f78166;
+    --explain:#e3b341; --dl:#ffa657; --nlp:#56d364; --course:#8b949e;
+    --font-sans: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono: ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 1px 1px,#161b22 1px,transparent 0);background-size:26px 26px;
+  }
+  a{color:var(--core);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,kbd{font-family:var(--font-mono)}
+  .wrap{max-width:1120px;margin:0 auto;padding:22px clamp(14px,3vw,32px) 80px}
+
+  .masthead{border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:18px}
+  .topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--core)}
+  .backlink{font-family:var(--font-mono);font-size:12px;color:var(--dim)}
+  .backlink a{color:var(--dim)}
+  .masthead h1{font-size:clamp(24px,3.4vw,34px);margin:.24em 0 .12em;letter-spacing:-.01em}
+  .masthead p{margin:0;color:var(--dim);max-width:78ch;font-size:15px}
+
+  /* ── The stack panel ─────────────────────────────────────── */
+  .stack{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px 18px;margin:18px 0 6px}
+  .stack h2{margin:0 0 4px;font-size:18px;letter-spacing:-.01em}
+  .stack > p{margin:0 0 13px;color:var(--dim);font-size:14px;max-width:80ch}
+  .layers{display:grid;gap:6px}
+  .layer{display:grid;grid-template-columns:minmax(0,150px) 1fr;gap:10px;align-items:baseline;
+    background:var(--bg);border:1px solid var(--border-2);border-left:3px solid var(--c,#30363d);
+    border-radius:8px;padding:8px 12px}
+  .layer b{font-family:var(--font-mono);font-size:12.5px;color:var(--c,var(--text))}
+  .layer b a{color:inherit;text-decoration:none}
+  .layer b a:hover{text-decoration:underline}
+  .layer span{font-size:13.5px;color:#cdd6e0}
+  a.layer{text-decoration:none;color:inherit;transition:border-color .15s,background .15s}
+  a.layer:hover{border-color:var(--c,var(--border-2));background:var(--panel-2);text-decoration:none}
+  a.layer:focus-visible{outline:2px solid var(--c,var(--core));outline-offset:1px}
+  .layer b::after{content:" →";opacity:0;transition:opacity .15s}
+  a.layer:hover b::after,a.layer:focus-visible b::after{opacity:.6}
+  @media(max-width:620px){.layer{grid-template-columns:1fr;gap:2px}}
+  .stack .note{margin:12px 0 0;font-size:13.5px;color:var(--dim);border-top:1px solid var(--border);padding-top:11px}
+  .stack .note b{color:var(--gold);font-weight:600}
+
+  /* ── Controls ────────────────────────────────────────────── */
+  .controls{position:sticky;top:0;z-index:20;background:linear-gradient(var(--bg),var(--bg) 82%,transparent);
+    padding:14px 0 10px;margin-bottom:6px}
+  .controls .inner{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+  #q{background:var(--bg);border:1px solid var(--border-2);border-radius:8px;color:var(--text);
+    font:inherit;font-size:14px;padding:9px 12px;flex:1;min-width:220px}
+  #q:focus-visible{outline:2px solid var(--core);outline-offset:1px;border-color:var(--core)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{--c:var(--dim);display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+    background:var(--bg);border:1px solid var(--border-2);border-radius:999px;color:var(--text);
+    font:inherit;font-size:12px;padding:4px 10px 4px 8px;transition:border-color .15s,opacity .15s}
+  .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+  .chip[aria-pressed="false"]{opacity:.4}
+  .chip[aria-pressed="false"]::before{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+  .chip:hover{border-color:var(--c)}
+  .chip:focus-visible{outline:2px solid var(--c);outline-offset:1px}
+  .weekrow{display:flex;flex-wrap:wrap;gap:5px;align-items:center;width:100%}
+  .weekrow .lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+  .wchip{cursor:pointer;background:var(--bg);border:1px solid var(--border-2);border-radius:6px;color:var(--dim);
+    font-family:var(--font-mono);font-size:11.5px;padding:3px 8px;transition:.15s}
+  .wchip:hover{color:var(--text);border-color:var(--dim)}
+  .wchip[aria-pressed="true"]{color:var(--bg);background:var(--core);border-color:var(--core);font-weight:700}
+  .count{font-family:var(--font-mono);font-size:12px;color:var(--dim);margin-left:auto}
+
+  /* ── Library cards ───────────────────────────────────────── */
+  .libs{display:grid;gap:16px;margin-top:8px}
+  .lib{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--c,#30363d);
+    border-radius:var(--radius);padding:16px 18px;scroll-margin-top:150px}
+  .lib:target{border-color:var(--gold);border-left-color:var(--gold)}
+  .lib .head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .lib h3{margin:0;font-size:18px;letter-spacing:-.01em}
+  .lib h3 a{color:var(--text)}
+  .lib .pill{font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;
+    padding:2px 7px;border-radius:5px;
+    background:color-mix(in srgb,var(--c,#30363d) 20%,#0d1117);
+    border:1px solid color-mix(in srgb,var(--c,#30363d) 55%,transparent);color:var(--c,#8b949e)}
+  .lib .wk{font-family:var(--font-mono);font-size:11.5px;color:var(--dim);margin-left:auto}
+  .lib .imp{display:block;margin:9px 0 0;font-size:12.5px;color:var(--dim);
+    background:var(--bg);border:1px solid var(--border-2);border-radius:7px;padding:7px 10px;
+    overflow-x:auto;white-space:pre}
+  .lib .what{margin:11px 0 0;font-size:14.5px;color:#cdd6e0}
+  .lib .mental{margin:11px 0 0;font-size:14px;color:#cdd6e0;
+    background:var(--panel-2);border:1px solid var(--border-2);border-radius:8px;padding:11px 13px}
+  .lib .mental b{color:var(--c,var(--text))}
+  .lib .mental code{font-size:12.5px;color:var(--text)}
+
+  .links{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
+  .links a{font-family:var(--font-mono);font-size:11.5px;color:var(--dim);
+    border:1px solid var(--border-2);border-radius:6px;padding:3px 9px}
+  .links a:hover{color:var(--text);border-color:var(--c,var(--dim));text-decoration:none}
+  .links a::after{content:" ↗";opacity:.5}
+  .links.local span{font-family:var(--font-mono);font-size:11.5px;color:var(--dim);
+    border:1px solid var(--border-2);border-radius:6px;padding:3px 9px}
+
+  details.api{margin:13px 0 0}
+  details.api > summary{cursor:pointer;font-family:var(--font-mono);font-size:12px;color:var(--dim);
+    letter-spacing:.05em;text-transform:uppercase;list-style:none;padding:5px 0}
+  details.api > summary::-webkit-details-marker{display:none}
+  details.api > summary::before{content:"▸ ";color:var(--c,var(--dim))}
+  details.api[open] > summary::before{content:"▾ "}
+  details.api > summary:hover{color:var(--text)}
+  .apitable{width:100%;border-collapse:collapse;margin-top:6px;display:block;overflow-x:auto}
+  .apitable tbody{display:table;width:100%}
+  .apitable tr{border-top:1px solid var(--border)}
+  .apitable td{padding:7px 10px 7px 0;vertical-align:top;font-size:13.5px}
+  .apitable td.sig{font-family:var(--font-mono);font-size:12.5px;color:var(--text);white-space:nowrap;padding-right:16px}
+  .apitable td.doc{color:#cdd6e0}
+  .apitable td.wk{font-family:var(--font-mono);font-size:11px;color:var(--dim);text-align:right;white-space:nowrap}
+  .apitable tr.apigroup td{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--c,var(--dim));padding:16px 0 4px}
+  .apitable tr.apigroup:first-child td{padding-top:4px}
+
+  .gotchas{margin:13px 0 0;padding:11px 13px;background:var(--bg);
+    border:1px solid var(--border-2);border-radius:8px}
+  .gotchas .lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--gold)}
+  .gotchas ul{margin:6px 0 0;padding-left:18px;display:grid;gap:5px}
+  .gotchas li{font-size:13.5px;color:#cdd6e0}
+  .gotchas code{font-size:12.5px;color:var(--text)}
+
+  .hidden{display:none!important}
+  .empty{color:var(--dim);font-size:14px;padding:30px 4px}
+
+  footer{margin-top:40px;color:var(--dim);font-size:12.5px;border-top:1px solid var(--border);padding-top:14px}
+  footer code{color:var(--text)}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="topline">
+      <div class="eyebrow">T-809-DATA · Data Mining &amp; Machine Learning</div>
+      <div class="backlink"><a href="index.html">← Skill Tree</a> · <a href="glossary.html">Glossary</a> · <a href="ai-tutor.html">Using AI →</a></div>
+    </div>
+    <h1>Library Reference</h1>
+    <p>Every library the exercises import, in one place. For each one: what it is, how it thinks,
+       where its real documentation lives, and the handful of functions you will actually call this
+       semester. Nothing here replaces the official docs — the point is to make them approachable,
+       so a new <code>import</code> stops feeling like a black box someone dropped into the notebook.</p>
+  </header>
+
+  <section class="stack">
+    <h2>The stack, bottom to top</h2>
+    <p>Almost every library in this course sits on the one below it. Knowing which layer you are on
+       tells you where to look when something breaks.</p>
+    <div class="layers">
+      <a class="layer" href="#numpy" style="--c:#58a6ff"><b>NumPy</b><span>Typed arrays and fast numeric operations. Everything above stores its numbers here.</span></a>
+      <a class="layer" href="#pandas" style="--c:#58a6ff"><b>pandas</b><span>NumPy arrays with labels: columns, an index, and missing values. The shape of tabular data.</span></a>
+      <a class="layer" href="#matplotlib" style="--c:#bc8cff"><b>Matplotlib</b><span>The drawing engine. Slow to write, capable of anything.</span></a>
+      <a class="layer" href="#seaborn" style="--c:#bc8cff"><b>seaborn</b><span>Statistical shortcuts over Matplotlib that speak DataFrame.</span></a>
+      <a class="layer" href="#sklearn" style="--c:#2dd4bf"><b>scikit-learn</b><span>One uniform interface over classical models, preprocessing, and evaluation.</span></a>
+      <a class="layer" href="#statsmodels" style="--c:#f78166"><b>statsmodels</b><span>The statistician's parallel branch: inference, diagnostics, time series.</span></a>
+      <a class="layer" href="#shap" style="--c:#e3b341"><b>SHAP</b><span>Sits on top of a fitted model and attributes its predictions to features.</span></a>
+      <a class="layer" href="#torch" style="--c:#ffa657"><b>PyTorch</b><span>Tensors with automatic differentiation. Replaces sklearn's <code>.fit()</code> with a loop you write.</span></a>
+      <a class="layer" href="#torchvision" style="--c:#ffa657"><b>torchvision</b><span>Image datasets, transforms, and pretrained vision weights for PyTorch.</span></a>
+      <div class="layer" style="--c:#56d364"><b><a href="#hfdatasets">datasets</a> · <a href="#transformers">transformers</a></b><span>Hugging Face: dataset loading and pretrained language models, also on PyTorch.</span></div>
+    </div>
+    <p class="note"><b>The pattern worth internalising:</b> a library is usually one core object plus a
+      contract for using it. NumPy has the array. pandas has the DataFrame. scikit-learn has the
+      estimator with <code>fit</code>/<code>predict</code>. PyTorch has the tensor and the module.
+      Learn the object and the contract, and the hundreds of functions become searchable details
+      rather than things to memorise.</p>
+  </section>
+
+  <div class="controls">
+    <div class="inner">
+      <input id="q" type="search" placeholder="Search libraries, functions, gotchas…" autocomplete="off" aria-label="Search library reference">
+      <div class="chips" id="cats"></div>
+      <span class="count" id="count"></span>
+      <div class="weekrow"><span class="lbl">Week</span><div class="chips" id="weeks"></div></div>
+    </div>
+  </div>
+
+  <div class="libs" id="libs"></div>
+  <p class="empty hidden" id="empty">Nothing matches that filter.</p>
+
+  <footer>
+    Companion to the <a href="index.html">skill tree</a> and the <a href="glossary.html">glossary</a>.
+    The function lists are drawn from what the exercise notebooks in <code>exercices/</code> actually
+    call, not from the whole API surface — when you need more, follow the documentation links.
+    Add or edit entries in the <code>LIBS</code> array of this file.
+  </footer>
+</div>
+
+<script>
+const CATS = {
+  core:    {label:"Foundations",        color:"#58a6ff"},
+  viz:     {label:"Visualisation",      color:"#bc8cff"},
+  ml:      {label:"Classical ML",       color:"#2dd4bf"},
+  stats:   {label:"Statistics",         color:"#f78166"},
+  explain: {label:"Interpretability",   color:"#e3b341"},
+  dl:      {label:"Deep Learning",      color:"#ffa657"},
+  nlp:     {label:"Language Models",    color:"#56d364"},
+  course:  {label:"Course Helpers",     color:"#8b949e"},
+};
+
+/* Each entry: id, name, cat, weeks, imp (import line), what, mental model,
+   docs links, api rows [signature, what it does, weeks], gotchas. */
+const LIBS = [
+
+{id:"numpy", name:"NumPy", cat:"core", weeks:[1,2,3,4,5,6,7,8,9,10],
+ imp:"import numpy as np",
+ what:"The array library underneath everything else. Whenever pandas, scikit-learn or PyTorch hands you numbers, they are NumPy arrays or something deliberately shaped like them.",
+ mental:"<b>One object: the <code>ndarray</code></b> — a block of memory with a fixed dtype and a shape. Every operation runs as a compiled loop, so the skill is phrasing work as whole-array expressions (<code>X.mean(axis=0)</code>) instead of Python loops over elements. If you find yourself writing <code>for i in range(len(X))</code> to do arithmetic, you have stepped outside the library and given up its speed.",
+ docs:[["Documentation home","https://numpy.org/doc/stable/"],
+       ["Absolute beginners guide","https://numpy.org/doc/stable/user/absolute_beginners.html"],
+       ["User guide","https://numpy.org/doc/stable/user/index.html"],
+       ["API reference","https://numpy.org/doc/stable/reference/index.html"]],
+ api:[
+   ["Making and reshaping arrays"],
+   ["np.asarray(x)","Turn a list, Series or tensor into an array without copying when it can avoid it. The usual way to normalise an input.","W01–W10"],
+   ["np.zeros(n) / np.ones(n)","An array of a given shape, prefilled. Useful for masks you fill in.","W04, W08"],
+   ["np.arange(a, b) / np.linspace(a, b, n)","Evenly spaced values by step, or by count. Ranks, axes, decision-boundary grids.","W01–W07"],
+   ["arr.reshape(shape) / arr.ravel()","Change the shape without copying data; <code>ravel</code> flattens to 1-D.","W03, W09"],
+   ["np.concatenate([a, b])","Join arrays along an existing axis. The array-level equivalent of <code>pd.concat</code>.","W08–W10"],
+   ["np.tile(values, n)","Repeat a block of values — how a seasonal-naive forecast is built.","W02"],
+
+   ["Reductions and selection"],
+   ["np.mean / .sum / .max / .min(axis=…)","Reduce along one axis. <code>axis=0</code> collapses rows (per column), <code>axis=1</code> collapses columns (per row).","W01–W09"],
+   ["np.argmax(scores, axis=1)","Index of the largest value — how a row of class scores becomes a predicted label.","W08–W10"],
+   ["np.unique(y)","Distinct values, sorted. With <code>return_counts=True</code>, also how often each appears — a one-line class-balance check.","W03–W09"],
+   ["np.flatnonzero(mask)","The indices where a boolean mask is True — how you collect all rows of one class.","W09"],
+   ["(labels == -1).sum()","Boolean arrays sum as 0/1, so this counts matches. DBSCAN's noise count is exactly this.","W07"],
+
+   ["Maths you will need"],
+   ["np.abs(x) / np.sqrt(x)","Absolute value and square root — the building blocks of MAE and RMSE.","W02, W03, W06"],
+   ["np.log(x) / np.exp(x)","Log transform and its inverse. Fit on the log scale, then exponentiate the forecast back.","W02"],
+   ["np.clip(x, lo, hi)","Bound values into a range, e.g. before dividing.","W02"],
+
+   ["Grids (for decision boundaries)"],
+   ["np.meshgrid(xs, ys)","Two 1-D axes into two 2-D coordinate grids covering the plane.","W03"],
+   ["np.c_[xx.ravel(), yy.ravel()]","Glue flattened grids into an (n, 2) array you can call <code>predict</code> on.","W03"],
+
+   ["Randomness and comparison"],
+   ["np.random.default_rng(seed)","A seeded random generator; <code>.choice(…, replace=False)</code> samples without replacement.","W01–W09"],
+   ["np.allclose(a, b)","Floating-point equality with tolerance. Exact <code>==</code> on floats is a trap; the self-check cells use this.","W01–W10"],
+   ["np.nan / np.isnan(x)","The missing-value marker, and the only correct way to test for it.","W01–W07"]],
+ gotchas:[
+   "<code>np.nan == np.nan</code> is <code>False</code>. Test with <code>np.isnan(x)</code> or <code>pd.isna(x)</code>.",
+   "Slicing returns a <b>view</b>, not a copy. Writing into <code>X[:5]</code> changes the original array. Use <code>.copy()</code> when you mean a copy.",
+   "Integer arrays stay integers: <code>np.array([1, 2]) / 2</code> gives floats, but <code>//</code> and in-place operations can silently truncate.",
+   "A shape error late in a pipeline usually started earlier. Print <code>.shape</code> at each step rather than guessing."],
+},
+
+{id:"pandas", name:"pandas", cat:"core", weeks:[1,2,3,4,5,6,7,8,9,10],
+ imp:"import pandas as pd",
+ what:"Labelled tabular data: the DataFrame you load, clean, group, and hand to a model. Also the container every results table in this course lives in.",
+ mental:"<b>A DataFrame is a dict of columns plus an Index.</b> The Index is the part people forget, and the cause of most surprises: arithmetic between two objects <i>aligns on the index first</i>, so adding two Series with different indices produces NaNs rather than an error. Almost every method returns a <b>new</b> object instead of modifying in place — if you do not assign the result, nothing happened.",
+ docs:[["Documentation home","https://pandas.pydata.org/docs/"],
+       ["10 minutes to pandas","https://pandas.pydata.org/docs/user_guide/10min.html"],
+       ["User guide","https://pandas.pydata.org/docs/user_guide/index.html"],
+       ["API reference","https://pandas.pydata.org/docs/reference/index.html"]],
+ api:[
+   ["Looking at a dataset"],
+   ["df.head() / .info() / .describe()","The first three commands of any EDA: what it looks like, what the dtypes and missing counts are, what the distributions are.","W01"],
+   ["df.columns / df.dtypes","Column names, and the type pandas inferred for each. Iterate them to build a per-column report.","W01"],
+   ["df['col'].value_counts(dropna=False)","Category frequencies, missing values included. The fastest way to spot a broken column.","W01–W06"],
+   ["s.nunique()","How many distinct values a column has.","W01"],
+   ["df.isna() / .isna().sum()","Boolean mask of missing values; summing it gives the count per column.","W01"],
+   ["s.dropna()","Drop missing values from a Series — needed before tests and before sampling example values.","W01, W02"],
+   ["s.tolist() / s.to_numpy()","Out of pandas: to a plain Python list, or to a NumPy array.","W01–W07"],
+
+   ["Building and reshaping tables"],
+   ["pd.DataFrame(rows)","Build a table from a list of dicts. The standard way to turn a loop's results into a results table.","W01–W10"],
+   ["df.groupby('col')['y'].mean()","Split, aggregate, combine. The single most useful pandas idea.","W01–W07"],
+   ["df.groupby(c)['y'].agg(['mean', 'size'])","Several aggregations at once; you get one column per aggregation.","W01"],
+   ["df.groupby(c)['y'].transform('median')","Aggregate but keep the original shape — each row gets its group's value. How you fill missing values by group.","W01"],
+   ["df.sort_values(by=[…], ascending=[…])","Sort by one or several keys, each with its own direction.","W01–W10"],
+   ["df.reset_index(drop=True)","Renumber the index after sorting or filtering. <code>drop=True</code> throws the old index away.","W01–W10"],
+   ["pd.concat([a, b], ignore_index=True)","Stack tables. <code>ignore_index=True</code> renumbers so you do not inherit duplicate index labels.","W03–W10"],
+   ["df.pivot_table(index=…, columns=…, values=…)","Long to wide. This is what turns the benchmark log into the comparison table.","W02–W10"],
+   ["df.melt(id_vars=…, value_vars=…)","Wide to long, the inverse of pivot. How model results become benchmark rows.","W02–W10"],
+   ["df.drop(columns=[…])","Remove columns. Returns a new frame; assign the result.","W01, W06, W07"],
+
+   ["Cleaning and deriving columns"],
+   ["df.copy()","An explicit copy. Take one before modifying a frame you were handed.","W01–W06"],
+   ["s.fillna(value)","Replace missing values. The value can be a scalar or an aligned Series.","W01"],
+   ["s.mode()","The most frequent value(s) — returns a Series, so take element <code>[0]</code>.","W01"],
+   ["s.median()","The middle value; robust to outliers, which is why it is the usual choice for filling ages.","W01"],
+   ["pd.cut(s, bins=…, labels=…)","Bin a numeric column into labelled categories.","W01"],
+   ["s.str.extract(r'…')","Pull a regex group out of every string in a column — how a title comes out of a name.","W01"],
+   ["s.isin([…]) / s.where(cond, other)","Test membership; keep values where a condition holds and replace the rest.","W01"],
+   ["s.map(dict) / s.replace(…)","Translate values through a lookup.","W01, W02"],
+   ["s.astype('float32')","Change dtype explicitly.","W01–W09"],
+
+   ["Series with an index that matters"],
+   ["s.iloc[:n] / s.iloc[-n:]","Positional slicing. Keeps the datetime index intact, which is what a chronological split needs.","W02"],
+   ["s.reindex(other.index)","Line one Series up with another's index before comparing them.","W02"],
+   ["pd.Series(values, index=…)","Build a Series with an index you choose — how a baseline forecast gets the test set's dates.","W02"],
+   ["s.diff(periods=1)","Difference consecutive values; <code>periods=12</code> for a seasonal difference.","W02"],
+
+   ["Files"],
+   ["pd.read_csv(path) / df.to_csv(path, index=False)","Read and write. Pass <code>index=False</code> unless the index carries meaning.","W02–W10"]],
+ gotchas:[
+   "<code>SettingWithCopyWarning</code> means pandas cannot tell whether you are writing to a view or a copy. Take an explicit <code>.copy()</code> when you slice a frame you intend to modify.",
+   "A column of mixed types becomes dtype <code>object</code> and silently disables numeric operations. Check <code>df.dtypes</code> when a mean comes out wrong.",
+   "<code>inplace=True</code> is not faster and not clearer. Assign the result instead.",
+   "Chained indexing (<code>df[df.a > 0]['b'] = 1</code>) may or may not write through. Use <code>.loc[rows, 'b'] = 1</code>."],
+},
+
+{id:"matplotlib", name:"Matplotlib", cat:"viz", weeks:[1,2,3,4,5,6,7,8,9,10],
+ imp:"import matplotlib.pyplot as plt",
+ what:"The plotting engine everything else draws on. Verbose by design, and the only one of these libraries that can produce exactly the figure you want.",
+ mental:"<b>Two APIs coexist, and mixing them is the usual source of confusion.</b> The implicit one (<code>plt.plot</code>, <code>plt.title</code>) draws into whichever figure is currently active. The explicit one (<code>fig, ax = plt.subplots()</code>, then <code>ax.plot</code>, <code>ax.set_title</code>) names the objects you are drawing into. The course uses the explicit style throughout — a <b>Figure</b> is the canvas, an <b>Axes</b> is one plot on it, and everything else hangs off the Axes.",
+ docs:[["Documentation home","https://matplotlib.org/stable/"],
+       ["Quick start guide","https://matplotlib.org/stable/users/explain/quick_start.html"],
+       ["Cheat sheets (PDF)","https://matplotlib.org/cheatsheets/"],
+       ["Example gallery","https://matplotlib.org/stable/gallery/index.html"]],
+ api:[
+   ["fig, ax = plt.subplots(figsize=(7, 5))","Create one figure with one Axes. The opening line of nearly every plot in this course.","W01–W10"],
+   ["fig, axes = plt.subplots(2, 3)","A grid of Axes. Iterate with <code>axes.ravel()</code>.","W01, W04, W09"],
+   ["ax.plot / .scatter / .bar / .imshow","Line, points, bars, image. All take the data first and styling as keywords.","W01–W09"],
+   ["ax.contourf(xx, yy, Z, alpha=…)","Filled regions over a grid — how a decision boundary gets drawn.","W03"],
+   ["ax.set_title / .set_xlabel / .set_ylabel","Label the plot. An unlabelled axis in a submitted notebook loses marks and, more importantly, meaning.","W01–W10"],
+   ["ax.set_xticks(pos) / .set_xticklabels(names)","Put categorical names where numeric ticks would be. Set positions first, then labels.","W01"],
+   ["ax.set_ylim(lo, hi) / ax.axis('off')","Fix the y range for comparable panels; hide axes on image grids.","W01, W04, W09"],
+   ["ax.legend() / scatter.legend_elements()","Draw a legend from <code>label=</code> arguments, or build one from a scatter's own classes.","W02–W09"],
+   ["plt.tight_layout()","Fix overlapping labels before showing. Call it last.","W01–W10"],
+   ["plt.show()","Render and flush the figure. In a notebook, do this once per figure.","W01–W10"]],
+ gotchas:[
+   "After <code>plt.show()</code> the figure is gone; further <code>ax.</code> calls do nothing visible. Configure first, show last.",
+   "<code>figsize</code> is in inches, not pixels, and interacts with DPI when you export.",
+   "If a plot appears twice in a cell, something already displayed it — seaborn and pandas <code>.plot()</code> both draw into the active figure.",
+   "Colour alone is not a legend. Label series, or a colourblind reader loses the plot entirely."],
+},
+
+{id:"seaborn", name:"seaborn", cat:"viz", weeks:[1,2,3,4,5,6,7,8,9,10],
+ imp:"import seaborn as sns",
+ what:"Statistical plotting on top of Matplotlib. It knows what a DataFrame is, so common exploratory figures collapse to one line.",
+ mental:"<b>A translation layer, not a replacement.</b> You name columns, seaborn maps them to visual channels (x, y, hue, size) and computes the statistics behind the plot. Every function returns Matplotlib objects, so the workflow is: get 90% of the figure from seaborn, then finish it with <code>ax.set_title(...)</code>. Most functions expect <b>long-form</b> data — one row per observation, one column per variable.",
+ docs:[["Documentation home","https://seaborn.pydata.org/"],
+       ["Tutorial","https://seaborn.pydata.org/tutorial.html"],
+       ["API reference","https://seaborn.pydata.org/api.html"],
+       ["Example gallery","https://seaborn.pydata.org/examples/index.html"]],
+ api:[
+   ["sns.set_theme()","Apply seaborn styling globally. Run once near the top of a notebook.","W01–W10"],
+   ["sns.heatmap(cm, annot=True, fmt='d')","A matrix as colour. Every confusion matrix in this course is this call.","W03–W10"],
+   ["sns.histplot(df, x='age', hue='survived')","Distribution of one variable, optionally split by a category.","W01"],
+   ["sns.barplot(df, x=…, y=…)","Group means with error bars — note it aggregates for you.","W05, W06"],
+   ["sns.boxplot / sns.violinplot","Distribution per group. Boxes show quartiles; violins show shape.","your own EDA"],
+   ["sns.scatterplot(df, x=…, y=…, hue=…)","Two numeric variables with a categorical third channel.","your own EDA"],
+   ["sns.pairplot(df, hue='species')","Every numeric pair at once. Expensive, but a fast first look at a small dataset.","your own EDA"],
+   ["sns.load_dataset('titanic')","Fetch a bundled example dataset. Requires network access on first use.","W01"]],
+ gotchas:[
+   "<code>sns.set_theme()</code> changes Matplotlib globally for the rest of the kernel session.",
+   "Wide-form data usually plots, but wrongly. If a figure looks strange, reshape to long form with <code>melt</code> first.",
+   "<code>barplot</code> shows the <i>mean</i> per group with a confidence interval. If you already aggregated, you want <code>ax.bar</code>.",
+   "Functions ending in <code>plot</code> return an Axes; figure-level ones (<code>pairplot</code>, <code>catplot</code>) return a grid object with a <code>.fig</code> attribute instead."],
+},
+
+{id:"sklearn", name:"scikit-learn", cat:"ml", weeks:[3,4,5,6,7,8,10],
+ imp:"from sklearn.model_selection import train_test_split, GridSearchCV\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.metrics import accuracy_score, f1_score, confusion_matrix",
+ what:"The classical machine learning library: preprocessing, models, model selection, and metrics behind one interface. Weeks 3 through 8 are essentially a tour of it.",
+ mental:"<b>One contract, applied to everything.</b> An <i>estimator</i> has <code>fit(X, y)</code>. A <i>transformer</i> adds <code>transform(X)</code>. A <i>predictor</i> adds <code>predict(X)</code>. A scaler, an SVM, and an entire Pipeline all obey it, which is exactly why <code>GridSearchCV</code> can tune any of them without knowing what they are. Two conventions follow: <b>hyperparameters go into the constructor</b> (<code>SVC(C=10)</code>), and <b>everything learned from data comes back as an attribute ending in an underscore</b> (<code>coef_</code>, <code>support_</code>, <code>best_params_</code>). If an attribute has no underscore, the model did not learn it.",
+ docs:[["Documentation home","https://scikit-learn.org/stable/"],
+       ["Getting started","https://scikit-learn.org/stable/getting_started.html"],
+       ["User guide","https://scikit-learn.org/stable/user_guide.html"],
+       ["API reference","https://scikit-learn.org/stable/api/index.html"],
+       ["Choosing an estimator","https://scikit-learn.org/stable/machine_learning_map.html"]],
+ api:[
+   ["Splitting and preprocessing"],
+   ["train_test_split(X, y, test_size=0.25, stratify=y, random_state=42)","Split once, honestly. <code>stratify=y</code> keeps class proportions; <code>random_state</code> makes it reproducible.","W03–W08"],
+   ["StandardScaler().fit(X_train) then .transform(X_test)","Centre and scale. Fit on training data <b>only</b> — this is the leakage lesson of Week 3.","W03, W04, W07, W08"],
+   ["scaler.fit_transform(X_train)","Fit and transform in one call. Correct on the training set, a leak on the test set.","W03–W08"],
+   ["Pipeline([('scaler', …), ('model', …)])","Chain preprocessing and model into one estimator, so cross-validation scales inside each fold.","W04, W10"],
+   ["clone(estimator)","A fresh, unfitted copy with the same hyperparameters. Use it to refit on a feature subset.","W06"],
+
+   ["The contract every estimator obeys"],
+   ["model.fit(X_train, y_train)","Train. Returns the model, so it chains.","W03–W10"],
+   ["model.predict(X)","Predicted labels or values.","W03–W10"],
+   ["model.predict_proba(X)[:, 1]","Class probabilities; column 1 is the positive class, which is what ROC-AUC wants.","W06"],
+   ["model.fit_predict(X)","Fit and return labels in one call. The clustering idiom — there is nothing to predict later.","W07"],
+
+   ["Regression models"],
+   ["LinearRegression() / Ridge(alpha=…) / Lasso(alpha=…)","Least squares, plus L2 and L1 penalised variants.","W03"],
+   ["DummyRegressor(strategy='mean')","Predicts the training mean. If your model cannot beat it, you have no model.","W03"],
+
+   ["Classification models"],
+   ["LogisticRegression(max_iter=1000)","Linear classifier with probabilistic output. The default strong baseline.","W03, W08, W10"],
+   ["KNeighborsClassifier(n_neighbors=5)","Instance-based; no training phase, and very sensitive to feature scale.","W03, W04, W08"],
+   ["SVC(kernel='rbf', C=…, gamma=…) / LinearSVC()","Max-margin classifiers. <code>C</code> trades margin width against violations; <code>gamma</code> sets RBF wiggliness.","W04"],
+   ["DecisionTreeClassifier(max_depth=…, random_state=…)","One interpretable tree. Depth is the overfitting dial.","W05, W06"],
+   ["RandomForestClassifier / ExtraTreesClassifier / BaggingClassifier(n_estimators=…)","Bagged ensembles: many trees on resampled data, averaged.","W05"],
+   ["GradientBoostingClassifier / HistGradientBoostingClassifier","Sequential boosting. The <code>Hist</code> variant is the fast, histogram-based one.","W06"],
+   ["DummyClassifier(strategy='most_frequent')","The baseline that says what 'no model at all' scores. Every benchmark row needs one.","W03–W08"],
+   ["model.feature_importances_","Fitted attribute of tree models: how much each feature reduced impurity. Note the trailing underscore.","W05, W06"],
+   ["export_text(tree, feature_names=…) / plot_tree(tree)","Print or draw a fitted tree so you can read its rules.","W05"],
+
+   ["Unsupervised"],
+   ["KMeans(n_clusters=k, n_init=10, random_state=…)","Partition into k clusters. <code>model.inertia_</code> is the within-cluster sum of squares.","W07"],
+   ["DBSCAN(eps=…, min_samples=…)","Density clustering. Labels points it cannot assign as <code>-1</code>, i.e. noise.","W07"],
+   ["PCA(n_components=2)","Linear dimensionality reduction; <code>explained_variance_ratio_</code> says how much you kept.","W04, W07"],
+
+   ["Metrics"],
+   ["accuracy_score / f1_score(y, yhat, average='macro')","Headline classification metrics. <code>average='macro'</code> treats every class equally, which is what you want with imbalance.","W03–W10"],
+   ["roc_auc_score(y, proba)","Ranking quality for a binary classifier. Takes probabilities, not labels.","W06"],
+   ["mean_squared_error / mean_absolute_error / r2_score","Regression metrics. RMSE is the square root of the first.","W03"],
+   ["confusion_matrix / classification_report","Where the errors actually are, per class.","W03–W10"],
+   ["silhouette_score(X, labels)","Cluster separation without labels, from -1 to 1. Undefined with fewer than two clusters.","W07"],
+   ["adjusted_rand_score(y_true, labels)","Agreement between clusters and true labels, corrected for chance.","W07"],
+
+   ["Tuning"],
+   ["GridSearchCV(est, param_grid, cv=5, scoring='f1_macro')","Exhaustive tuning by cross-validation, without touching the test set.","W04"],
+   ["search.best_estimator_ / .best_params_ / .best_score_","What the search learned. <code>best_estimator_</code> is already refitted on all the training data.","W04"],
+   ["search.cv_results_","A dict of arrays with one entry per candidate. Wrap it in <code>pd.DataFrame</code> to read it.","W04"],
+
+   ["Data and text"],
+   ["load_wine() / load_digits() / load_diabetes() / load_iris() / load_breast_cancer()","The bundled datasets this course runs on. No network needed, which is why they were chosen.","W03–W08"],
+   ["TfidfVectorizer(max_features=…, ngram_range=(1, 2))","Text to a sparse bag-of-words matrix — the baseline Week 10's transformer has to beat.","W10"]],
+ gotchas:[
+   "Fitting the scaler on all the data before splitting leaks test information into training. Fit on train, transform both.",
+   "<code>GridSearchCV</code> refits the best model on the whole training set by default (<code>refit=True</code>) — <code>best_estimator_</code> is ready to use.",
+   "Accuracy on imbalanced data is close to meaningless. Compare against <code>DummyClassifier</code> before believing a number.",
+   "Anything with <code>random_state</code> gives different results without it. Set it everywhere, including the split.",
+   "Underscore attributes only exist <i>after</i> <code>fit</code>. <code>AttributeError: coef_</code> means the model was never fitted."],
+},
+
+{id:"statsmodels", name:"statsmodels", cat:"stats", weeks:[2],
+ imp:"from statsmodels.tsa.arima.model import ARIMA\nfrom statsmodels.tsa.stattools import adfuller\nfrom statsmodels.graphics.tsaplots import plot_acf, plot_pacf",
+ what:"Statistical modelling with inference attached: p-values, confidence intervals, information criteria, diagnostics. Week 2's time-series work lives here.",
+ mental:"<b>Statistics first, prediction second</b> — the opposite emphasis from scikit-learn. The API separates the <i>specification</i> from the <i>fit</i>: <code>model = ARIMA(series, order=(2,1,1))</code> describes the model, <code>res = model.fit()</code> is the fitted result, and everything interesting (<code>res.aic</code>, <code>res.summary()</code>, <code>res.get_forecast(...)</code>) hangs off the results object. It is also index-aware: give it a DatetimeIndex with a frequency and forecasts come back with correct dates attached.",
+ docs:[["Documentation home","https://www.statsmodels.org/stable/index.html"],
+       ["User guide","https://www.statsmodels.org/stable/user-guide.html"],
+       ["Time series analysis (tsa)","https://www.statsmodels.org/stable/tsa.html"],
+       ["ARIMA reference","https://www.statsmodels.org/stable/generated/statsmodels.tsa.arima.model.ARIMA.html"]],
+ api:[
+   ["ARIMA(series, order=(p, d, q)).fit()","Fit an ARIMA model. <code>order</code> is (AR terms, differencing, MA terms).","W02"],
+   ["res.summary()","The full statistical report: coefficients, standard errors, p-values, AIC/BIC.","W02"],
+   ["res.aic / res.bic","Information criteria for comparing candidate orders. Lower is better — but lower AIC is not automatically a better forecast.","W02"],
+   ["res.get_forecast(steps=24).predicted_mean","Forecast forward, with <code>.conf_int()</code> for the interval.","W02"],
+   ["adfuller(series)","Augmented Dickey–Fuller test. A small p-value is evidence against a unit root, i.e. for stationarity.","W02"],
+   ["seasonal_decompose(series, model='additive', period=12)","Split a series into trend, seasonal, and residual components.","W02"],
+   ["plot_acf(series) / plot_pacf(series)","Autocorrelation plots — the classic way to eyeball plausible p and q.","W02"]],
+ gotchas:[
+   "If you fit on a log-transformed series, forecasts come back on the log scale. Exponentiate before scoring against the original data.",
+   "Convergence warnings are common and not always fatal, but a non-converged fit should not be reported as a result.",
+   "A series without a frequency on its index produces forecasts indexed by integers instead of dates.",
+   "The ADF test's null hypothesis is <i>non</i>-stationarity. Failing to reject is not proof of a unit root, only absence of evidence against it."],
+},
+
+{id:"shap", name:"SHAP", cat:"explain", weeks:[6],
+ imp:"import shap",
+ what:"Attributes an individual prediction to the features that produced it, using Shapley values from cooperative game theory. Week 6 uses it to choose features, not just to decorate the notebook.",
+ mental:"<b>Not a model — a lens on a fitted model.</b> You give it a trained model and some data; it returns, for every row and every feature, a number saying how much that feature pushed the prediction away from the dataset's base value. Those numbers are <b>additive</b>: base value + sum of SHAP values = the prediction, exactly. Global importance is then just the mean absolute SHAP value per feature. Pick the explainer that matches your model — <code>TreeExplainer</code> is exact and fast for tree ensembles, and that is what the course uses.",
+ docs:[["Documentation home","https://shap.readthedocs.io/en/latest/"],
+       ["API reference","https://shap.readthedocs.io/en/latest/api.html"],
+       ["Tabular examples","https://shap.readthedocs.io/en/latest/tabular_examples.html"],
+       ["Source on GitHub","https://github.com/shap/shap"]],
+ api:[
+   ["shap.TreeExplainer(model)","Exact, fast explainer for tree-based models (random forests, gradient boosting).","W06"],
+   ["shap.Explainer(model, X)","The modern entry point: picks a suitable explainer for the model you hand it.","W06"],
+   ["explainer.shap_values(X)","The attribution matrix: one value per row per feature.","W06"],
+   ["shap.summary_plot(shap_values, X)","The beeswarm: feature importance <i>and</i> the direction of each feature's effect, in one figure.","W06"],
+   ["shap.summary_plot(…, plot_type='bar')","Global importance only — mean absolute SHAP value per feature.","W06"],
+   ["shap_values[i]","One row of the matrix is one prediction explained: which features pushed it up, which pushed it down.","W06"],
+   ["np.abs(shap_values).mean(axis=0)","Global importance computed by hand. Worth doing once so the summary plot stops being magic.","W06"]],
+ gotchas:[
+   "For binary classifiers, older SHAP versions return a list of two arrays (one per class). Check the shape before indexing.",
+   "SHAP explains <i>what the model does</i>, not what is true in the world. A high SHAP value on a leaked feature is a bug report, not an insight.",
+   "The plotting functions draw into the active Matplotlib figure. Pass <code>show=False</code> if you want to keep customising.",
+   "Non-tree explainers approximate by sampling and can be very slow. Explain a subset of the test set, not everything."],
+},
+
+{id:"torch", name:"PyTorch", cat:"dl", weeks:[8,9,10],
+ imp:"import torch\nfrom torch import nn\nfrom torch.utils.data import DataLoader, TensorDataset",
+ what:"The deep learning framework used from Week 8 onwards. Tensors that can live on a GPU, automatic gradients, and layers you compose yourself.",
+ mental:"<b>Two ideas do all the work.</b> First, a <code>Tensor</code> is a NumPy array that also remembers where it lives (CPU or GPU). Second, <b>autograd</b>: every operation on a tensor records itself, so <code>loss.backward()</code> can walk that record and fill in <code>.grad</code> for every parameter. An <code>nn.Module</code> is just a container of parameters with a <code>forward()</code>. There is deliberately no <code>.fit()</code> — the training loop is yours, and it is always the same five steps: zero the gradients, forward pass, compute loss, backward pass, optimizer step. Write it once by hand and deep learning stops being mysterious.",
+ docs:[["Documentation home","https://pytorch.org/docs/stable/index.html"],
+       ["Tutorials","https://pytorch.org/tutorials/"],
+       ["Deep Learning with PyTorch: a 60 Minute Blitz","https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html"],
+       ["torch.nn reference","https://pytorch.org/docs/stable/nn.html"]],
+ api:[
+   ["Tensors"],
+   ["torch.tensor(x, dtype=torch.float32)","Make a tensor. Features are usually <code>float32</code>; classification targets are <code>long</code>.","W08–W10"],
+   ["torch.device('cuda' if torch.cuda.is_available() else 'cpu')","Pick the device once, then <code>.to(device)</code> the model and every batch.","W08–W10"],
+   ["t.item() / t.size(0)","A one-element tensor as a Python number; the length of a batch along dimension 0.","W08–W10"],
+   ["t.detach().cpu().numpy()","The idiom for getting numbers back out of a tensor for pandas or sklearn.","W08–W10"],
+   ["torch.softmax(logits, dim=1) / probs.max(dim=1)","Logits to probabilities; then the largest value and its index, returned as a pair.","W10"],
+
+   ["Data"],
+   ["TensorDataset(X_tensor, y_tensor)","Pairs features with labels so a DataLoader can batch them together.","W08"],
+   ["DataLoader(dataset, batch_size=64, shuffle=True)","Batch, shuffle, and iterate. Shuffle the training set; never the test set.","W08–W10"],
+
+   ["Building a model"],
+   ["nn.Module with __init__ and forward","Define a model: layers in <code>__init__</code>, the computation in <code>forward</code>.","W08, W09"],
+   ["nn.Sequential(*layers)","Stack layers without writing a class — including a list you built in a loop.","W08, W09"],
+   ["nn.Linear(in_features, out_features)","A dense layer. Read <code>layer.in_features</code> when you need to size a replacement.","W08–W10"],
+   ["nn.ReLU() / nn.Dropout(p)","Non-linearity, and regularisation that only acts in <code>train()</code> mode.","W08, W09"],
+   ["nn.Conv2d(in_ch, out_ch, kernel_size=3, padding=1)","A convolution. <code>padding=1</code> with kernel 3 keeps the height and width unchanged.","W09"],
+   ["nn.MaxPool2d(2) / nn.Flatten()","Halve height and width; then flatten feature maps into a vector for the classifier.","W09"],
+   ["p.requires_grad = False","Freeze a parameter so the optimizer leaves it alone. This is what 'freezing the backbone' means.","W09"],
+
+   ["Training"],
+   ["nn.CrossEntropyLoss()","Classification loss. It applies softmax internally — feed it raw logits, never softmaxed probabilities.","W08–W10"],
+   ["torch.optim.Adam(model.parameters(), lr=1e-3)","The optimizer, told which parameters it is allowed to change.","W08–W10"],
+   ["optimizer.zero_grad(); loss.backward(); optimizer.step()","The three lines that are the training loop. Gradients accumulate, so the zeroing is not optional.","W08–W10"],
+   ["model.train() / model.eval()","Switch modes. Dropout and batch norm behave differently in each.","W08–W10"],
+   ["with torch.no_grad():","Turn off gradient tracking for evaluation. Faster, and much less memory.","W08–W10"],
+   ["torch.manual_seed(42)","Seed the framework. Necessary for reproducibility, and still not quite sufficient on GPU.","W08–W10"]],
+ gotchas:[
+   "Forgetting <code>optimizer.zero_grad()</code> makes gradients accumulate across batches. The model still trains, badly, and nothing raises an error.",
+   "Forgetting <code>model.eval()</code> leaves dropout active at test time and quietly lowers your reported accuracy.",
+   "A device mismatch (<code>Expected all tensors to be on the same device</code>) means the model or a batch was not moved with <code>.to(device)</code>.",
+   "<code>CrossEntropyLoss</code> expects logits and integer class targets. Passing probabilities or one-hot targets trains something, just not what you meant.",
+   "Calling <code>.numpy()</code> on a tensor that requires grad or sits on the GPU fails. The idiom is <code>t.detach().cpu().numpy()</code>."],
+},
+
+{id:"torchvision", name:"torchvision", cat:"dl", weeks:[9],
+ imp:"from torchvision import datasets, transforms, models",
+ what:"PyTorch's computer vision companion: standard image datasets, preprocessing transforms, and pretrained model weights. Week 9's transfer learning depends on it.",
+ mental:"<b>Three independent pieces.</b> <code>datasets</code> downloads and wraps common benchmarks so they behave like a PyTorch Dataset. <code>transforms</code> composes per-sample preprocessing into a pipeline applied lazily as batches are loaded. <code>models</code> hands you an architecture, optionally with pretrained weights — and the weights object also carries the exact preprocessing it was trained with, which is why <code>weights.transforms()</code> exists. Transfer learning is then just: load pretrained, freeze the feature extractor, replace the classifier head.",
+ docs:[["Documentation home","https://pytorch.org/vision/stable/index.html"],
+       ["Datasets","https://pytorch.org/vision/stable/datasets.html"],
+       ["Models and pretrained weights","https://pytorch.org/vision/stable/models.html"],
+       ["Transforms","https://pytorch.org/vision/stable/transforms.html"]],
+ api:[
+   ["datasets.CIFAR10(root, train=True, download=True, transform=…)","Download and wrap CIFAR-10. Same pattern for MNIST, FashionMNIST and the rest.","W09"],
+   ["transforms.Compose([...])","Chain transforms into one callable applied to every sample.","W09"],
+   ["transforms.ToTensor()","PIL image to tensor, and rescale pixels from 0–255 to 0–1.","W09"],
+   ["transforms.Normalize(mean, std)","Per-channel standardisation. The numbers must match what the pretrained model expects.","W09"],
+   ["transforms.Resize(224)","Resize to the input size a pretrained network was trained on.","W09"],
+   ["MobileNet_V2_Weights.DEFAULT.transforms()","The exact preprocessing those weights were trained with. Safer than retyping the numbers.","W09"],
+   ["models.mobilenet_v2(weights=MobileNet_V2_Weights.DEFAULT)","A pretrained backbone. <code>weights=None</code> gives the same architecture untrained.","W09"],
+   ["model.classifier[1] = nn.Linear(in_features, n_classes)","Replace the head. Read the old layer's <code>.in_features</code> rather than hard-coding it.","W09"],
+   ["for p in model.features.parameters(): p.requires_grad = False","Freeze the backbone so only the new head trains.","W09"],
+   ["Subset(dataset, indices)","Take a slice of a dataset — how the course keeps CIFAR-10 small enough to train on a laptop.","W09"],
+   ["dataset.targets","The label of every example, as a list. Turn it into an array to find the indices of one class.","W09"]],
+ gotchas:[
+   "Normalisation must match the pretrained weights. The wrong mean and std silently costs accuracy without any error.",
+   "Upscaling 32×32 CIFAR images to 224×224 makes batches ~50× larger. That is the real reason the notebook feels slow.",
+   "Transforms run per sample on the CPU inside the DataLoader. Heavy transforms starve the GPU.",
+   "The first run downloads weights and data over the network. Plan for it, and do not do it five minutes before a deadline."],
+},
+
+{id:"hfdatasets", name:"Hugging Face datasets", cat:"nlp", weeks:[10],
+ imp:"from datasets import load_dataset, Dataset, DatasetDict",
+ what:"Dataset loading and processing for the Hugging Face ecosystem. Week 10 uses it to fetch and tokenise the emotion classification data.",
+ mental:"<b>An Arrow table on disk, not a DataFrame in RAM.</b> Data is memory-mapped, so datasets larger than memory work fine and loading is nearly instant. The workhorse is <code>.map()</code>, which applies a function to every example (or, with <code>batched=True</code>, to chunks) and <b>caches the result</b> — so the expensive tokenisation pass runs once and later runs are free. A <code>DatasetDict</code> is just a dict of splits, usually train/validation/test.",
+ docs:[["Documentation home","https://huggingface.co/docs/datasets/index"],
+       ["Quickstart","https://huggingface.co/docs/datasets/quickstart"],
+       ["Loading a dataset","https://huggingface.co/docs/datasets/loading"],
+       ["Process","https://huggingface.co/docs/datasets/process"]],
+ api:[
+   ["load_dataset('dair-ai/emotion')","Fetch a dataset from the Hub. Returns a DatasetDict of splits.","W10"],
+   ["ds['train'][0]","Index a split like a list; each example is a dict of columns.","W10"],
+   ["ds.map(fn, batched=True)","Apply a function to every example. This is where tokenisation happens.","W10"],
+   ["ds.shuffle(seed=42).select(range(2000))","Take a reproducible random subset — how the course keeps training times sane.","W10"],
+   ["ds.train_test_split(test_size=0.2, seed=42)","Split a single dataset into two.","W10"],
+   ["ds.to_pandas() / Dataset.from_pandas(df)","Out to a DataFrame and back again.","W10"],
+   ["ds.features['label'].names","The human-readable label names behind the integer classes. You need these for <code>id2label</code>.","W10"]],
+ gotchas:[
+   "<code>.map()</code> caches on disk keyed by your function. Change the function and it recomputes; change something the function closes over and it may not notice.",
+   "Datasets are immutable — <code>map</code>, <code>filter</code> and <code>select</code> all return new objects.",
+   "Labels arrive as integers. The names live in <code>features['label'].names</code>, and you need them for a readable confusion matrix.",
+   "The first load downloads from the Hub and needs network access."],
+},
+
+{id:"transformers", name:"Hugging Face transformers", cat:"nlp", weeks:[10],
+ imp:"from transformers import (AutoTokenizer, AutoModelForSequenceClassification,\n                          TrainingArguments, Trainer)",
+ what:"Pretrained language models and the machinery to fine-tune them. Week 10 fine-tunes DistilBERT and compares it against a TF-IDF baseline.",
+ mental:"<b>Three objects that must agree with each other:</b> a <i>config</i> (the architecture), a <i>tokenizer</i> (text to integer ids), and a <i>model</i> (the weights). The <code>Auto*</code> classes exist so you name a checkpoint once and the right classes get looked up for you. Because the tokenizer is part of the checkpoint, mixing one model's tokenizer with another's weights produces fluent nonsense rather than an error. <code>Trainer</code> then wraps the same PyTorch loop you wrote by hand in Week 8, with logging, evaluation, and checkpointing added.",
+ docs:[["Documentation home","https://huggingface.co/docs/transformers/index"],
+       ["Quick tour","https://huggingface.co/docs/transformers/quicktour"],
+       ["Fine-tuning a pretrained model","https://huggingface.co/docs/transformers/training"],
+       ["Trainer reference","https://huggingface.co/docs/transformers/main_classes/trainer"]],
+ api:[
+   ["AutoTokenizer.from_pretrained('distilbert-base-uncased')","Load the tokenizer belonging to a checkpoint. Always the same string as the model.","W10"],
+   ["tokenizer(texts, truncation=True, max_length=128, padding=True)","Text to <code>input_ids</code> and <code>attention_mask</code>, truncated and padded to a common length.","W10"],
+   ["tokenizer(texts, return_tensors='pt')","Same, but returns PyTorch tensors ready to feed the model directly.","W10"],
+   ["model(**encoded).logits","Call the model on a tokenised batch; the raw scores are on the <code>.logits</code> attribute.","W10"],
+   ["AutoModelForSequenceClassification.from_pretrained(ckpt, num_labels=6)","Pretrained encoder plus a fresh classification head sized to your labels.","W10"],
+   ["TrainingArguments(output_dir=…, num_train_epochs=2, learning_rate=2e-5)","Every training knob in one object. Fine-tuning wants a much smaller learning rate than training from scratch.","W10"],
+   ["DataCollatorWithPadding(tokenizer)","Pads each batch to its own longest sequence instead of a fixed length. Faster than padding everything to <code>max_length</code>.","W10"],
+   ["Trainer(model, args, train_dataset, eval_dataset, compute_metrics=…)","The loop, wrapped. <code>compute_metrics</code> is your own function over predictions and labels.","W10"],
+   ["trainer.train() / .evaluate() / .predict()","Fine-tune, score on the evaluation split, get raw predictions for a confusion matrix.","W10"],
+   ["model.config.id2label = {0: 'sadness', …}","Attach human-readable label names so predictions are interpretable.","W10"],
+   ["pipeline('sentiment-analysis', model=…)","One-line inference on raw strings, tokenisation included.","W10"]],
+ gotchas:[
+   "The tokenizer and the model must come from the same checkpoint. Mismatches degrade quality silently.",
+   "<code>max_length</code> truncation throws away the end of long texts. If your inputs are long, know what you are cutting.",
+   "Fine-tuning learning rates live around 2e-5 to 5e-5. Anything like 1e-3 will destroy the pretrained weights in one epoch.",
+   "The model outputs logits, not probabilities. Apply softmax yourself if you need calibrated-looking scores.",
+   "First run downloads a few hundred megabytes of weights."],
+},
+
+{id:"dmml_benchmark", name:"dmml_benchmark (course helper)", cat:"course", weeks:[2,3,4,5,6,7,8,9,10],
+ imp:"import sys\nsys.path.append(\"../common\")\nfrom dmml_benchmark import save_results",
+ what:"A small module written for this course, living in <code>exercices/common/</code>. It keeps one benchmark table for the whole semester so weekly notebooks stay short.",
+ mental:"<b>Weekly notebooks produce numbers; this module stores them; one shared notebook does all the comparing.</b> Results are written in long format (one row per model per metric) to <code>common/benchmark_results.csv</code>, because long tables are the ones you can append to. <code>common/benchmark.ipynb</code> reads them back and pivots to the wide view where each model becomes a column. Rows are keyed by week, dataset, target, split, model and metric, so re-running a week replaces its rows rather than duplicating them.",
+ /* Paths inside the course materials, not URLs — this card's files are not
+    published with the site. Rendered as plain paths, see `local` below. */
+ docs:[["exercices/common/dmml_benchmark.py","the module"],
+       ["exercices/common/benchmark.ipynb","the shared notebook"],
+       ["exercices/model_comparison_schema.md","the schema and contract"]],
+ local:true,
+ api:[
+   ["save_results(results, week=…, dataset=…, task_type=…, target=…, split=…)","Append a week's results table to the shared benchmark. The last cell of every weekly notebook.","W02–W10"],
+   ["load_benchmark()","Read the whole long table back as a DataFrame.","shared notebook"],
+   ["pivot_wide(long, task_type=…)","Long to wide: models become columns, metrics stay rows.","shared notebook"],
+   ["repeated_measurements(long)","Find models measured in two different weeks on the same setup, and check they agree.","shared notebook"],
+   ["coverage(long)","Which weeks have reported in, and which are still missing.","shared notebook"],
+   ["clear_benchmark(week=None)","Delete one week's rows, or start over.","shared notebook"]],
+ gotchas:[
+   "Pass <code>metrics=[...]</code> when a results table mixes quality metrics with timings — cost columns like <code>fit_time_sec</code> are not scores.",
+   "Two scores are comparable only if task, target, split and metric all match. That is why the wide view is built per dataset.",
+   "<code>benchmark_results.csv</code> is yours and is gitignored. Losing it means re-running the save cell of each week, not redoing the work."],
+},
+
+{id:"stdlib", name:"Python standard library", cat:"course", weeks:[1,2,3,4,5,6,7,8,9,10],
+ imp:"from pathlib import Path\nfrom time import perf_counter\nfrom itertools import product\nimport warnings",
+ what:"The parts of plain Python the notebooks lean on. Small, but worth recognising when they appear in a provided cell.",
+ mental:"<b>No mental model needed — just recognition.</b> These show up in scaffolding cells and are easy to mistake for third-party machinery when you are reading quickly.",
+ docs:[["Python standard library","https://docs.python.org/3/library/index.html"],
+       ["pathlib","https://docs.python.org/3/library/pathlib.html"],
+       ["itertools","https://docs.python.org/3/library/itertools.html"],
+       ["warnings","https://docs.python.org/3/library/warnings.html"]],
+ api:[
+   ["Path('data') / 'file.csv'","Filesystem paths that work on every OS. The <code>/</code> operator joins them.","W09, W10"],
+   ["perf_counter()","A high-resolution clock. Take the difference of two calls to time a fit.","W02–W10"],
+   ["product(C_values, gamma_values)","Every combination of two lists — a manual grid search in one loop.","W04"],
+   ["warnings.filterwarnings('ignore')","Silence expected library noise. Use it deliberately, not to hide real problems.","W01–W10"],
+   ["enumerate(xs) / zip(a, b)","Index while iterating; iterate two sequences together. Everywhere.","W01–W10"],
+   ["isinstance(x, str)","Type check — how a function accepts either one string or a list of them.","W06, W10"],
+   ["hasattr(model, 'feature_importances_')","Ask whether an object has an attribute before using it, instead of crashing.","W05"],
+   ["try: … except Exception:","Record a failure as a NaN row and carry on, rather than killing the whole notebook.","W02"],
+   ["raise ValueError('…')","Reject invalid arguments early, with a message that says what was wrong.","W02, W09"],
+   ["d.items()","Iterate a dict as (key, value) pairs — the shape of every 'dictionary of models' loop.","W02–W10"]],
+ gotchas:[
+   "Silencing all warnings also silences the ones telling you your model did not converge.",
+   "<code>perf_counter()</code> measures wall-clock time, so a busy laptop makes your model look slow."],
+},
+
+];
+
+/* ── Render ─────────────────────────────────────────────────────────────── */
+const ALL_WEEKS = [1,2,3,4,5,6,7,8,9,10];
+const state = {q:"", cats:new Set(Object.keys(CATS)), week:null};
+
+function weekLabel(ws){
+  if(ws.length >= 10) return "All weeks";
+  const runs=[]; let start=ws[0], prev=ws[0];
+  for(let i=1;i<=ws.length;i++){
+    if(ws[i]===prev+1){ prev=ws[i]; continue; }
+    runs.push(start===prev ? `W${String(start).padStart(2,"0")}`
+                           : `W${String(start).padStart(2,"0")}–W${String(prev).padStart(2,"0")}`);
+    start=prev=ws[i];
+  }
+  return runs.join(", ");
+}
+
+const libsEl = document.getElementById("libs");
+LIBS.forEach(lib=>{
+  const c = CATS[lib.cat] || {color:"#8b949e", label:lib.cat};
+  const el = document.createElement("article");
+  el.className = "lib";
+  el.id = lib.id;
+  el.style.setProperty("--c", c.color);
+  el.dataset.cat = lib.cat;
+  el.dataset.weeks = lib.weeks.join(",");
+  el.dataset.text = [
+    lib.name, lib.imp, lib.what, lib.mental,
+    lib.api.map(r=>r[0]+" "+r[1]).join(" "),
+    (lib.gotchas||[]).join(" ")
+  ].join(" ").toLowerCase();
+
+  /* `local` cards point at files in the course materials rather than the web,
+     so they render as plain paths — a link would 404 on the published site. */
+  const links = `<div class="links${lib.local ? " local" : ""}">${lib.docs.map(([t,u])=>
+      lib.local ? `<span title="${u}">${t}</span>`
+                : `<a href="${u}" target="_blank" rel="noopener">${t}</a>`).join("")}</div>`;
+
+  /* A one-element row is a group heading inside the table. */
+  const rows = lib.api.map(r => r.length===1
+    ? `<tr class="apigroup"><td colspan="3">${r[0]}</td></tr>`
+    : `<tr><td class="sig">${r[0]}</td><td class="doc">${r[1]}</td><td class="wk">${r[2]}</td></tr>`
+  ).join("");
+  const nFuncs = lib.api.filter(r=>r.length>1).length;
+
+  const gotchas = (lib.gotchas||[]).length ? `<div class="gotchas">
+      <div class="lbl">Where people get caught</div>
+      <ul>${lib.gotchas.map(g=>`<li>${g}</li>`).join("")}</ul>
+    </div>` : "";
+
+  el.innerHTML = `
+    <div class="head">
+      <h3><a href="#${lib.id}">${lib.name}</a></h3>
+      <span class="pill">${c.label}</span>
+      <span class="wk">${weekLabel(lib.weeks)}</span>
+    </div>
+    <code class="imp">${lib.imp}</code>
+    <p class="what">${lib.what}</p>
+    <div class="mental">${lib.mental}</div>
+    ${links}
+    <details class="api"><summary>Functions you will actually call (${nFuncs})</summary>
+      <table class="apitable"><tbody>${rows}</tbody></table>
+    </details>
+    ${gotchas}`;
+  libsEl.appendChild(el);
+});
+
+/* Category chips */
+const catsEl = document.getElementById("cats");
+Object.entries(CATS).forEach(([k,v])=>{
+  const b=document.createElement("button");
+  b.className="chip"; b.style.setProperty("--c",v.color);
+  b.textContent=v.label; b.setAttribute("aria-pressed","true");
+  b.onclick=()=>{
+    const on=b.getAttribute("aria-pressed")==="true";
+    b.setAttribute("aria-pressed", String(!on));
+    on ? state.cats.delete(k) : state.cats.add(k);
+    render();
+  };
+  catsEl.appendChild(b);
+});
+
+/* Week chips */
+const weeksEl = document.getElementById("weeks");
+[["All",null], ...ALL_WEEKS.map(w=>[`W${String(w).padStart(2,"0")}`,w])].forEach(([label,w])=>{
+  const b=document.createElement("button");
+  b.className="wchip"; b.textContent=label;
+  b.setAttribute("aria-pressed", String(state.week===w));
+  b.onclick=()=>{
+    state.week = w;
+    weeksEl.querySelectorAll(".wchip").forEach((x,i)=>
+      x.setAttribute("aria-pressed", String((i===0?null:ALL_WEEKS[i-1])===w)));
+    render();
+  };
+  weeksEl.appendChild(b);
+});
+
+document.getElementById("q").addEventListener("input", e=>{
+  state.q = e.target.value.toLowerCase().trim();
+  render();
+});
+
+function render(){
+  let shown=0;
+  document.querySelectorAll(".lib").forEach(el=>{
+    const weeks = el.dataset.weeks.split(",").map(Number);
+    const ok = state.cats.has(el.dataset.cat)
+            && (state.week===null || weeks.includes(state.week))
+            && (state.q==="" || el.dataset.text.includes(state.q));
+    el.classList.toggle("hidden", !ok);
+    if(ok) shown++;
+  });
+  document.getElementById("count").textContent = shown + " librar" + (shown===1?"y":"ies");
+  document.getElementById("empty").classList.toggle("hidden", shown>0);
+}
+
+/* Jumping to a card — from the stack panel above or a direct link — should
+   reveal it even when a filter is hiding it, and open its function table. */
+function revealHash(){
+  if(!location.hash) return;
+  const card = document.getElementById(location.hash.slice(1));
+  if(!card || !card.classList.contains("lib")) return;
+  card.classList.remove("hidden");
+  const details = card.querySelector("details");
+  if(details) details.open = true;
+  card.scrollIntoView({block:"start"});
+}
+window.addEventListener("hashchange", revealHash);
+
+render();
+revealHash();
+</script>
+</body>
+</html>
