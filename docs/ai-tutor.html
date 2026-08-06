@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DMML — Using AI on the Assignments</title>
+<meta name="description" content="A suggested prompt that puts an AI assistant into tutor mode for the Data Mining & Machine Learning assignments, plus what good and bad use looks like.">
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel-2:#1c2128;
+    --border:#21262d; --border-2:#30363d;
+    --text:#e6edf3; --dim:#8b949e; --gold:#e3b341;
+    --core:#58a6ff; --good:#3fb950; --bad:#f78166;
+    --font-sans: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono: ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 1px 1px,#161b22 1px,transparent 0);background-size:26px 26px;
+  }
+  a{color:var(--core);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:var(--font-mono);font-size:.92em}
+  .wrap{max-width:900px;margin:0 auto;padding:22px clamp(14px,3vw,32px) 80px}
+
+  .masthead{border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:22px}
+  .topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--core)}
+  .backlink{font-family:var(--font-mono);font-size:12px;color:var(--dim)}
+  .backlink a{color:var(--dim)}
+  .masthead h1{font-size:clamp(24px,3.4vw,34px);margin:.24em 0 .12em;letter-spacing:-.01em}
+  .masthead p{margin:0;color:var(--dim);max-width:75ch;font-size:15px}
+
+  section{margin:0 0 30px}
+  h2{font-size:20px;margin:30px 0 6px;letter-spacing:-.01em}
+  h3{font-size:15.5px;margin:0 0 6px}
+  p{max-width:78ch}
+  .lede p{font-size:15.5px;color:#cdd6e0}
+
+  /* Prompt block */
+  .promptbox{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    overflow:hidden;margin-top:12px}
+  .promptbar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);
+    background:var(--panel-2);flex-wrap:wrap}
+  .promptbar .lbl{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--dim)}
+  .copybtn{margin-left:auto;background:var(--bg);border:1px solid var(--border-2);border-radius:7px;
+    color:var(--text);font:inherit;font-size:12.5px;padding:5px 12px;cursor:pointer;
+    transition:border-color .15s,background .15s}
+  .copybtn:hover{border-color:var(--core);background:var(--panel)}
+  .copybtn:focus-visible{outline:2px solid var(--core);outline-offset:1px}
+  .copybtn.done{border-color:var(--good);color:var(--good)}
+  pre#prompt{margin:0;padding:16px 18px;overflow-x:auto;font-family:var(--font-mono);
+    font-size:12.6px;line-height:1.62;color:#cdd6e0;white-space:pre-wrap;word-break:break-word}
+
+  /* Two-column compare */
+  .compare{display:grid;gap:14px;grid-template-columns:1fr;margin-top:12px}
+  @media(min-width:760px){.compare{grid-template-columns:1fr 1fr}}
+  .col{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--c);
+    border-radius:var(--radius);padding:15px 17px}
+  .col h3{color:var(--c)}
+  .col ul{margin:8px 0 0;padding-left:18px;display:grid;gap:8px}
+  .col li{font-size:13.8px;color:#cdd6e0}
+  .col li em{color:var(--dim);font-style:normal;display:block;margin-top:2px;font-size:12.8px}
+
+  .note{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--gold);
+    border-radius:var(--radius);padding:15px 17px;margin-top:14px}
+  .note h3{color:var(--gold)}
+  .note p{margin:6px 0 0;font-size:14px;color:#cdd6e0}
+
+  .steps{counter-reset:s;display:grid;gap:10px;margin-top:12px;padding:0;list-style:none}
+  .steps li{counter-increment:s;position:relative;padding-left:34px;font-size:14px;color:#cdd6e0}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:23px;height:23px;
+    border-radius:50%;background:var(--panel-2);border:1px solid var(--border-2);color:var(--core);
+    font-family:var(--font-mono);font-size:12px;display:grid;place-items:center}
+  .steps li b{color:var(--text)}
+
+  footer{margin-top:44px;color:var(--dim);font-size:12.5px;border-top:1px solid var(--border);padding-top:14px}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="topline">
+      <div class="eyebrow">T-809-DATA · Data Mining &amp; Machine Learning</div>
+      <div class="backlink">
+        <a href="index.html">← Skill Tree</a> ·
+        <a href="glossary.html">Glossary</a> ·
+        <a href="libraries.html">Libraries</a>
+      </div>
+    </div>
+    <h1>Using AI on the Assignments</h1>
+    <p>Let us be realistic: a lot of you will use an AI assistant on these notebooks.
+       So rather than pretend otherwise, here is a prompt that makes it useful to you.
+       Paste it before you start, and the assistant will push you toward the answer
+       instead of handing it over.</p>
+  </header>
+
+  <section class="lede">
+    <p>An AI that writes your notebook for you has cost you the only thing the assignment was
+       for. You will pass the week and arrive at the exam, or at your first job, without the
+       skill the week existed to build. An AI that explains the concept, points you at the
+       right documentation page, and tells you which of your lines is wrong is the opposite:
+       it is the most patient teaching assistant you will ever have, available at two in the
+       morning.</p>
+    <p>The difference between those two outcomes is mostly a matter of how you ask. That is
+       what this prompt is for.</p>
+  </section>
+
+  <section>
+    <h2>The prompt</h2>
+    <p>Paste this at the start of a conversation, before you ask anything about the
+       assignment. It works with any of the current assistants — Claude, ChatGPT, Gemini,
+       Copilot.</p>
+
+    <div class="promptbox">
+      <div class="promptbar">
+        <span class="lbl">Tutor-mode prompt</span>
+        <button class="copybtn" id="copy" type="button">Copy</button>
+      </div>
+<pre id="prompt">You are my tutor for a university course in Data Mining and Machine Learning.
+
+I work in weekly Jupyter notebooks that contain function stubs I have to implement,
+self-check cells with assertions, and written questions I answer in my own words.
+Your job is to help me become able to do this, not to do it for me. Hold that line
+even when I get frustrated and ask you to just hand me the answer.
+
+DO THESE FREELY
+- Explain concepts, maths and intuition, at any depth I ask for.
+- Explain what a library function does and what its arguments mean, and point me to
+  the exact page of the official documentation.
+- Read an error message with me and teach me how to locate the cause.
+- Review code I have already written: point to the line that is wrong and name the
+  property it violates, without rewriting it for me.
+- Work through an example on data that is not my assignment's data.
+- Ask me questions to find out what I actually misunderstand.
+- Disagree with me. Tell me when my reasoning is wrong, or when my conclusion does
+  not follow from my numbers.
+
+DO NOT DO THESE
+- Do not write the body of a function I have been asked to implement.
+- Do not give me a complete, runnable version of a cell I am supposed to fill in.
+- Do not answer the notebook's written or reflection questions for me. You may react
+  to a draft I have written myself.
+- Do not tell me what my results will be before I have run the code.
+
+WHEN I AM STUCK, ESCALATE ONE STEP AT A TIME
+1. Ask me what I have tried and what I expected to happen.
+2. Name the concept or the function I am missing, and link me the documentation.
+3. Describe the solution in words: the steps in order, or pseudocode that contains no
+   library calls.
+4. Show me one isolated piece of syntax, on toy data, that I still have to adapt.
+Take one step per message and wait for me to try it before going further. If I ask
+you to jump straight to the end, remind me once that I asked you not to, then let me
+decide.
+
+HOW TO START
+Before answering a question about a task, ask me what I have already tried and what
+specifically is confusing. If I paste code, assume I want a review and not a rewrite,
+unless I tell you otherwise.
+
+WHEN I TELL YOU I HAVE SUBMITTED
+Drop all of the above and go through the whole assignment with me properly, including
+the code you would have written.</pre>
+    </div>
+
+    <div class="note">
+      <h3>Note the escape hatch — it is deliberate</h3>
+      <p>The prompt tells the assistant to remind you once, then respect your decision. That is
+         not a loophole I forgot to close. A rule you cannot override is a rule you will simply
+         stop using at midnight before the deadline. Keeping the decision yours means you have
+         to make it consciously, which is the whole point.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Why the prompt is shaped this way</h2>
+    <ul class="steps">
+      <li><b>It asks what you tried first.</b> Most of the learning in a programming exercise
+        happens in the gap between your attempt and the working version. Skip the attempt and
+        there is no gap to learn from.</li>
+      <li><b>It escalates in steps.</b> Being stuck is not one state. Sometimes you are missing
+        a concept, sometimes a function name, sometimes one line of syntax. Handing over the
+        finished cell answers all three at once and teaches none of them.</li>
+      <li><b>It asks for documentation links.</b> The assistant will not be in the exam with
+        you, and it will not always be right. Knowing your way around
+        <a href="https://scikit-learn.org/stable/user_guide.html" target="_blank" rel="noopener">the
+        sklearn user guide</a> is a skill that outlives any particular model. The
+        <a href="libraries.html">Library Reference</a> on this site is the fast index into it.</li>
+      <li><b>It separates code from interpretation.</b> The reflection questions are where you
+        decide what your numbers actually mean. That judgement is the part of this course that
+        is hardest to automate away, and it is worth practising deliberately.</li>
+      <li><b>It flips after you submit.</b> Once your work is in, an AI walkthrough of the whole
+        assignment is one of the best revision tools you have. Ask for it.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What this looks like in practice</h2>
+    <div class="compare">
+      <div class="col" style="--c:var(--good)">
+        <h3>Questions that make you better</h3>
+        <ul>
+          <li>“Why do we fit the scaler on the training set only? What exactly leaks if I fit it
+            on everything?”
+            <em>Concept you will be asked about again in every later week.</em></li>
+          <li>“My function returns the right columns but the sorting assertion fails. Here is my
+            code — which line is wrong?”
+            <em>You keep the debugging; the assistant narrows the search.</em></li>
+          <li>“What does <code>average='macro'</code> change in <code>f1_score</code>, and when
+            would it disagree with accuracy?”
+            <em>Understanding the metric before you report it.</em></li>
+          <li>“I got a silhouette of 0.65 for DBSCAN but a worse ARI than k-means. How should I
+            think about that?”
+            <em>Asking for a way to reason, not for the conclusion.</em></li>
+          <li>“Point me at the docs for <code>cv_results_</code>. I cannot work out the column
+            names.”
+            <em>Learning to find things yourself, faster.</em></li>
+        </ul>
+      </div>
+      <div class="col" style="--c:var(--bad)">
+        <h3>Questions that hollow out the week</h3>
+        <ul>
+          <li>“Implement <code>split_scale_digits</code> for me.”
+            <em>This is the assignment. There is nothing left after this.</em></li>
+          <li>“Here is my notebook, fill in all the stubs.”
+            <em>You will not be able to explain a single line of what you submit.</em></li>
+          <li>“Write my reflection answers.”
+            <em>The interpretation is the part that is actually yours.</em></li>
+          <li>“Just give me code that passes the asserts.”
+            <em>The assertions exist to check your understanding, not to be defeated.</em></li>
+          <li>“Here is the whole notebook, what is wrong with it?”
+            <em>Reasonable-sounding, but you never learn to localise a bug.</em></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How to tell it is going wrong</h2>
+    <p>Three honest self-checks. If any of them fails, you are on the wrong side of this line,
+       whatever the notebook says:</p>
+    <ul class="steps">
+      <li>You could not explain, out loud and without notes, what a function you submitted
+        actually does.</li>
+      <li>You could not rewrite it from scratch tomorrow, given the same task and no assistant.</li>
+      <li>You do not know why one of your numbers came out the way it did.</li>
+    </ul>
+    <div class="note">
+      <h3>On the rules</h3>
+      <p>This page is about using AI well. It does not replace the university's academic
+         integrity regulations or the rules stated for this course — those still govern what you
+         are permitted to submit, and the work you hand in is your responsibility either way.
+         If you are unsure whether a particular use is allowed, ask me before you do it, not
+         after.</p>
+    </div>
+  </section>
+
+  <footer>
+    Part of the DMML course site — <a href="index.html">skill tree</a>,
+    <a href="glossary.html">glossary</a>, <a href="libraries.html">library reference</a>.
+    The prompt is a starting point, not scripture. If you find a wording that works better for
+    how you study, use it and tell me.
+  </footer>
+</div>
+
+<script>
+const btn = document.getElementById("copy");
+btn.addEventListener("click", async () => {
+  const text = document.getElementById("prompt").textContent;
+  try{
+    await navigator.clipboard.writeText(text);
+  }catch(e){
+    // file:// and older browsers fall back to a hidden textarea
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); }catch(_){}
+    document.body.removeChild(ta);
+  }
+  btn.textContent = "Copied";
+  btn.classList.add("done");
+  setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("done"); }, 2000);
+});
+</script>
+</body>
+</html>

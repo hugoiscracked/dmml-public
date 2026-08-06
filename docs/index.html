@@ -23,6 +23,10 @@
     --radius:10px;
   }
   *{box-sizing:border-box}
+  /* Always reserve the scrollbar gutter. Without this, a card long enough to
+     add a page scrollbar narrows the layout, and the graph's aspect-ratio
+     turns that width change into a visible height change. */
+  html{scrollbar-gutter:stable}
   html,body{margin:0}
   body{
     background:var(--bg); color:var(--text); font-family:var(--font-sans);
@@ -77,8 +81,14 @@
   .btn-reset:focus-visible{outline:2px solid var(--root);outline-offset:1px}
 
   /* ── Stage: graph + inspector ─────────────────────────────── */
-  .stage{display:grid;grid-template-columns:1fr;gap:18px}
-  @media(min-width:1400px){ .stage{grid-template-columns:minmax(0,1fr) 330px} }
+  .stage{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+  @media(min-width:1400px){
+    .stage{grid-template-columns:minmax(0,1fr) 330px;align-items:stretch}
+    /* Side by side, the inspector is taken out of flow (see the .panel
+       override below): its column contributes no intrinsic height, so the row
+       is sized by the tree alone and a long card cannot push the footer down. */
+    .panel-col{position:relative}
+  }
 
   .graph-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:
      linear-gradient(180deg,#0f151d,#0d1117);padding:8px}
@@ -117,9 +127,21 @@
   .node.locked .node__wk{color:var(--locked)}
 
   /* ── Inspector ────────────────────────────────────────────── */
+  /* Fixed vertical footprint: the card scrolls inside itself rather than
+     resizing the page, which would change the graph's width and — via
+     aspect-ratio — its height. */
   .panel{
     background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
-    padding:18px 18px 20px;align-self:start;position:sticky;top:14px;min-height:320px;
+    padding:18px 18px 20px;align-self:start;position:sticky;top:14px;
+    min-height:320px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;
+    scrollbar-width:thin;scrollbar-color:var(--border-2) transparent;
+  }
+  /* Must come after the base rule above to win the cascade: side by side, the
+     card fills its column exactly and scrolls internally, never resizing it.
+     height:100% is load-bearing — the base rule's align-self:start would
+     otherwise shrink this absolutely-positioned box back to its content. */
+  @media(min-width:1400px){
+    .panel{position:absolute;inset:0;height:100%;min-height:0;max-height:none}
   }
   .panel__hint{color:var(--dim);font-size:14px}
   .panel__hint strong{color:var(--text);font-weight:600}
@@ -235,10 +257,12 @@
         <div class="nodes" id="nodes"></div>
       </div>
     </div>
-    <aside class="panel" id="panel" aria-live="polite">
-      <p class="panel__hint"><strong>Select a method</strong> on the tree to see when to use it, what it
-        assumes, the libraries involved, its course page, and the assignment.</p>
-    </aside>
+    <div class="panel-col">
+      <aside class="panel" id="panel" aria-live="polite">
+        <p class="panel__hint"><strong>Select a method</strong> on the tree to see when to use it, what it
+          assumes, the libraries involved, its course page, and the assignment.</p>
+      </aside>
+    </div>
   </div>
 
   <footer>
@@ -352,6 +376,7 @@ const SVGNS="http://www.w3.org/2000/svg";
 const nodesLayer=document.getElementById("nodes");
 const edgesSvg=document.getElementById("edges");
 const panel=document.getElementById("panel");
+const PANEL_HINT=panel.innerHTML;   // the "Select a method" placeholder, restored on deselect
 const graphEl=document.getElementById("graph");
 
 /* Map to the actual content bounding box (not the full 76×52 canvas) so the
@@ -456,10 +481,10 @@ function applyFilters(){
     e.classList.toggle("faded",faded);
     if(faded){ e.classList.remove("hot"); e.classList.remove("dim"); }
   });
-  // if the selected node became hidden, clear the inspector highlight (keep panel)
+  // A pinned node that a filter just hid must not keep highlighting the tree.
   if(state.selected){
     const el=nodeEls[state.selected];
-    if(el.classList.contains("dim")||el.classList.contains("locked")) { /* keep panel, drop ring */ }
+    if(el.classList.contains("dim")||el.classList.contains("locked")){ deselect(); return; }
   }
   paintHighlight();
 }
@@ -493,8 +518,17 @@ function termsHtml(id){
     <div class="p-eyebrow" style="margin-bottom:8px"><span>Key terms</span></div>
     <div class="p-terms">${ts.map(s=>`<a class="termchip" data-slug="${s}" href="glossary.html#${s}" target="_blank" rel="noopener">${GLOSS[s].name}</a>`).join("")}</div>`;
 }
+/* Clear the pinned node: drop the ring, the edge highlight, and the card. */
+function deselect(){
+  if(state.selected===null) return;
+  state.selected=null;
+  DATA.nodes.forEach(n=>nodeEls[n.id].classList.remove("selected"));
+  panel.innerHTML=PANEL_HINT;
+  paintHighlight();
+}
 function select(id){
   hideTip();
+  if(state.selected===id){ deselect(); return; }   // clicking the pinned node unpins it
   state.selected=id;
   DATA.nodes.forEach(n=>nodeEls[n.id].classList.toggle("selected",n.id===id));
   const n=byId[id];
@@ -578,9 +612,12 @@ document.getElementById("reset").addEventListener("click",()=>{
   searchIn.value=""; weekIn.value=12; weekOut.textContent="all weeks";
   [...branchChips.children].forEach(c=>c.setAttribute("aria-pressed","true"));
   [...libChips.children].forEach(c=>c.setAttribute("aria-pressed","false"));
+  deselect();
   applyFilters();
 });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ hovering=null; hideTip(); paintHighlight(); }});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){ hovering=null; hideTip(); deselect(); paintHighlight(); }
+});
 
 /* Key-term tooltips: definition on hover/focus; click opens the glossary anchor. */
 const tipEl=document.createElement("div"); tipEl.className="tip"; tipEl.setAttribute("role","tooltip");
