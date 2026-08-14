@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DMML — Commonly Confused Terms</title>
+<meta name="description" content="Disambiguations of the machine-learning terms that get used interchangeably but carry real distinctions — loss vs cost, bias's three meanings, kernel's several, sample vs sample.">
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel-2:#1c2128;
+    --border:#21262d; --border-2:#30363d;
+    --text:#e6edf3; --dim:#8b949e; --gold:#e3b341;
+    --core:#58a6ff; --data:#3fb950; --ts:#f78166; --sup:#2dd4bf;
+    --eval:#e3b341; --tree:#56d364; --unsup:#bc8cff; --dl:#ffa657;
+    --font-sans: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono: ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 1px 1px,#161b22 1px,transparent 0);background-size:26px 26px;
+  }
+  a{color:var(--core);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1120px;margin:0 auto;padding:22px clamp(14px,3vw,32px) 80px}
+
+  .masthead{border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:18px}
+  .topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--core)}
+  .backlink{font-family:var(--font-mono);font-size:12px;color:var(--dim)}
+  .backlink a{color:var(--dim)}
+  .masthead h1{font-size:clamp(24px,3.4vw,34px);margin:.24em 0 .12em;letter-spacing:-.01em}
+  .masthead p{margin:0;color:var(--dim);max-width:75ch;font-size:15px}
+
+  /* Controls */
+  .controls{position:sticky;top:0;z-index:20;background:linear-gradient(var(--bg),var(--bg) 82%,transparent);
+    padding:12px 0 10px;margin-bottom:6px}
+  .controls .inner{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+  #q{background:var(--bg);border:1px solid var(--border-2);border-radius:8px;color:var(--text);
+    font:inherit;font-size:14px;padding:9px 12px;flex:1;min-width:200px}
+  #q:focus-visible{outline:2px solid var(--core);outline-offset:1px;border-color:var(--core)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{--c:var(--dim);display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+    background:var(--bg);border:1px solid var(--border-2);border-radius:999px;color:var(--text);
+    font:inherit;font-size:12px;padding:4px 10px 4px 8px;transition:border-color .15s,opacity .15s}
+  .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+  .chip[aria-pressed="false"]{opacity:.4}
+  .chip[aria-pressed="false"]::before{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+  .chip:hover{border-color:var(--c)}
+  .chip:focus-visible{outline:2px solid var(--c);outline-offset:1px}
+  .count{font-family:var(--font-mono);font-size:12px;color:var(--dim);margin-left:auto}
+
+  /* Week filter row */
+  .weekrow{margin-top:8px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+  .lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+  .wchip{cursor:pointer;background:var(--bg);border:1px solid var(--border-2);border-radius:8px;color:var(--dim);
+    font-family:var(--font-mono);font-size:12px;padding:4px 9px;transition:border-color .15s,color .15s,background .15s}
+  .wchip:hover{border-color:var(--dim);color:var(--text)}
+  .wchip[aria-pressed="true"]{background:color-mix(in srgb,var(--gold) 26%,var(--bg));
+    border-color:var(--gold);color:var(--gold);font-weight:700;
+    box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 45%,transparent)}
+  /* weeks pulled in by "include earlier weeks" — same family, clearly quieter */
+  .wchip.incl{background:transparent;
+    border-color:color-mix(in srgb,var(--gold) 32%,var(--border-2));
+    color:color-mix(in srgb,var(--gold) 45%,var(--dim))}
+  .wchip.incl:hover{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 60%,var(--border-2))}
+  .wchip:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+  .cum{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--dim);cursor:pointer}
+  .cum input{accent-color:var(--gold)}
+  .cum.off{opacity:.45;cursor:default}
+  .wknote{font-size:12.5px;color:var(--gold);font-family:var(--font-mono)}
+  .btn-reset{background:transparent;border:1px solid var(--border-2);color:var(--dim);
+    border-radius:8px;font:inherit;font-size:12.5px;padding:5px 11px;cursor:pointer;
+    transition:color .15s,border-color .15s}
+  .btn-reset:hover{color:var(--text);border-color:var(--dim)}
+  .btn-reset:focus-visible{outline:2px solid var(--core);outline-offset:1px}
+  .btn-reset.on{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 55%,var(--border-2))}
+
+  section h2{font-size:20px;margin:26px 0 4px;letter-spacing:-.01em}
+  section .sub{color:var(--dim);font-size:14px;margin:0 0 16px;max-width:80ch}
+
+  /* Disambiguation cards */
+  .confusables{display:grid;gap:14px;grid-template-columns:1fr}
+  @media(min-width:760px){.confusables{grid-template-columns:1fr 1fr}}
+  .dis{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--gold);
+    border-radius:var(--radius);padding:15px 17px;scroll-margin-top:150px}
+  .dis:target{border-color:var(--gold);background:var(--panel-2)}
+  .dis .top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .dis h3{margin:0 0 4px;font-size:16px;letter-spacing:-.01em}
+  .dis .tag{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+  .dis .wk{font-family:var(--font-mono);font-size:11px;color:var(--dim);flex:none}
+  .dis dl{margin:10px 0 0;display:grid;gap:7px}
+  .dis dt{font-weight:700;font-size:14px}
+  .dis dd{margin:0 0 2px;font-size:13.5px;color:#cdd6e0}
+  .dis .bottom{margin-top:11px;padding-top:10px;border-top:1px solid var(--border);
+    font-size:13px;color:var(--dim)}
+  .dis .bottom b{color:var(--gold);font-weight:600}
+  .dis .see{margin-top:9px;font-size:12.5px;color:var(--dim)}
+  .dis .see a{color:var(--sup)}
+  .empty{color:var(--dim);font-size:14px;padding:24px 2px}
+  .hidden{display:none!important}
+
+  footer{margin-top:40px;color:var(--dim);font-size:12.5px;border-top:1px solid var(--border);padding-top:14px}
+  footer code{font-family:var(--font-mono);color:var(--text)}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="topline">
+      <div class="eyebrow">T-809-DATA · Data Mining &amp; Machine Learning</div>
+      <div class="backlink">
+        <a href="index.html">← Skill Tree</a> ·
+        <a href="glossary.html">Glossary</a> ·
+        <a href="libraries.html">Libraries</a> ·
+        <a href="ai-tutor.html">Using AI →</a>
+      </div>
+    </div>
+    <h1>Commonly Confused Terms</h1>
+    <p>Words we (instructors included) reach for interchangeably that carry real distinctions.
+       Skim these once and a lot of quiet confusion resolves itself — a fair share of “I don't
+       understand this” is actually two words being used for one thing, or one word for three.
+       Looking for a plain definition instead? That's the <a href="glossary.html">glossary</a>.</p>
+  </header>
+
+  <div class="controls">
+    <div class="inner">
+      <input id="q" type="search" placeholder="Search these clusters…" autocomplete="off" aria-label="Search commonly confused terms">
+      <div class="chips" id="cats"></div>
+      <span class="count" id="count"></span>
+      <button class="btn-reset" id="reset" type="button">Reset filters</button>
+    </div>
+    <div class="inner weekrow" aria-label="Filter by course week">
+      <span class="lbl">Week</span>
+      <div class="chips" id="weeks"></div>
+      <label class="cum" id="cumLabel"><input type="checkbox" id="cum"> include earlier weeks</label>
+      <span class="wknote" id="wknote"></span>
+    </div>
+  </div>
+
+  <section>
+    <div class="confusables" id="confusables"></div>
+    <p class="empty hidden" id="empty">Nothing matches those filters.</p>
+  </section>
+
+  <footer>
+    Companion to the <a href="glossary.html">glossary</a> and the
+    <a href="index.html">interactive skill tree</a>. Each cluster is tagged with the week it first
+    matters; “include earlier weeks” turns the filter into a cumulative review list.
+    Add or edit clusters in the <code>DISAMBIG</code> array of this file.
+  </footer>
+</div>
+
+<script>
+const CATS = {
+  core: {label:"Foundations",        color:"#58a6ff"},
+  data: {label:"Data & Features",    color:"#3fb950"},
+  ts:   {label:"Time Series",        color:"#f78166"},
+  sup:  {label:"Supervised Models",  color:"#2dd4bf"},
+  eval: {label:"Evaluation & Tuning",color:"#e3b341"},
+  tree: {label:"Trees & Ensembles",  color:"#56d364"},
+  unsup:{label:"Unsupervised & Dim. Reduction", color:"#bc8cff"},
+  dl:   {label:"Neural & Deep Learning", color:"#ffa657"},
+};
+
+/* Course weeks — keep in sync with glossary.html */
+const WEEKS = {
+  1:"Setup & EDA", 2:"Time series & ARIMA", 3:"Regression & classification",
+  4:"SVM & tuning", 5:"Trees & ensembles", 6:"Boosting & SHAP",
+  7:"Clustering & PCA", 8:"Neural networks", 9:"CNNs & transfer learning",
+  10:"Sequences & transformers",
+};
+
+/* ── Commonly-confused clusters ──────────────────────────────────────────
+   c = category (CATS key), w = week it first matters, see = glossary terms.  */
+const DISAMBIG = [
+  {t:"AI · ML · Deep Learning · Data Mining", c:"core", w:1, items:[
+    ["Artificial intelligence","The broadest field — any machine doing “intelligent” tasks."],
+    ["Machine learning","Systems that learn patterns from data. A subset of AI."],
+    ["Deep learning","ML using many-layered neural networks. A subset of ML."],
+    ["Data mining","Discovering patterns in large datasets — overlaps ML and databases."],
+  ], bottom:"Nested: <b>AI ⊃ ML ⊃ deep learning.</b> Data mining and data science overlap ML rather than nesting neatly.",
+     see:["Machine learning","Data mining","Deep learning"]},
+
+  {t:"Feature · Variable · Attribute · Predictor · Covariate", c:"data", w:1, items:[
+    ["All of them","Different traditions' names for one input column."],
+    ["Feature","ML / engineering."],
+    ["Variable · Predictor · Covariate · Independent variable","Statistics."],
+    ["Attribute","Data mining / databases."],
+  ], bottom:"Same object, different vocabulary. Pick one and be consistent.",
+     see:["Feature engineering","Feature selection"]},
+
+  {t:"Label · Target · Class · Response · Ground truth", c:"data", w:1, items:[
+    ["Target / Label","ML name for the thing you predict (label usually implies classification)."],
+    ["Response · Dependent variable","Statistics."],
+    ["Class","The target specifically in classification."],
+    ["Ground truth","The true value used to evaluate a prediction."],
+  ], bottom:"Beware “output”: it can mean the <b>target</b> or the <b>model's prediction</b> — say which.",
+     see:["Ground truth","Supervised learning"]},
+
+  {t:"Sample · Instance · Observation · Example · Data point", c:"data", w:1, items:[
+    ["In ML","All mean one unit of data — one row."],
+    ["“Sample” in statistics","A <em>set</em> of observations, not a single one."],
+  ], bottom:"This is a real trap: <b>a “sample” to an ML engineer is one row; to a statistician it's the whole collection.</b>",
+     see:["Descriptive statistics","Bootstrap"]},
+
+  {t:"Scaling · Standardization · Normalization", c:"data", w:1, items:[
+    ["Scaling","Umbrella term for transforming a feature's range."],
+    ["Standardization (z-score)","Subtract the mean, divide by the std → mean 0, std 1."],
+    ["Normalization","Usually min–max scaling to [0, 1] — but often used loosely for any scaling."],
+    ["Batch/Layer normalization","A deep-learning technique that normalizes <em>activations</em> — unrelated to feature scaling."],
+  ], bottom:"“Normalize” is the most abused word here. <b>In deep learning it means normalizing activations, not features.</b>",
+     see:["Feature scaling","Standardization","Min-max scaling","Batch normalization"]},
+
+  {t:"Correlation · Covariance · Causation", c:"data", w:1, items:[
+    ["Covariance","Raw co-variation of two variables; units-dependent, unbounded."],
+    ["Correlation","Covariance normalized to [−1, 1] (Pearson)."],
+    ["Causation","X actually causes Y — <em>not</em> implied by either of the above."],
+  ], bottom:"Correlation is standardized covariance; <b>neither implies causation.</b>",
+     see:["Correlation","Covariance"]},
+
+  {t:"Inference — two meanings", c:"core", w:1, items:[
+    ["Inference (statistics)","Drawing conclusions about a population or parameters — confidence intervals, hypothesis tests."],
+    ["Inference (ML / deployment)","Running a trained model to get predictions (“inference time” vs “training time”)."],
+  ], bottom:"In this course “inference” usually means <b>getting predictions from a trained model.</b>",
+     see:["Inference"]},
+
+  {t:"Supervised · Unsupervised · Self-supervised · Semi-supervised", c:"core", w:3, items:[
+    ["Supervised","Labeled data; learn X → y."],
+    ["Unsupervised","No labels; find structure in X (clustering, PCA)."],
+    ["Semi-supervised","A small labeled set plus a large unlabeled set."],
+    ["Self-supervised","Labels are generated from the data itself (masked words, next token) — powers pretraining."],
+  ], bottom:"Self-supervised is not “unsupervised”: it invents a supervised task <b>from</b> unlabeled data.",
+     see:["Supervised learning","Unsupervised learning","Pretrained model"]},
+
+  {t:"Overfitting · Underfitting (and their aliases)", c:"core", w:3, items:[
+    ["Overfitting = high variance","Model too complex; fits noise. Low training error, high test error."],
+    ["Underfitting = high bias","Model too simple; misses real structure. High training error too."],
+  ], bottom:"Diagnose by the <b>gap</b>: big train/test gap → overfit; both bad → underfit.",
+     see:["Overfitting","Underfitting","Bias–variance tradeoff"]},
+
+  {t:"Bias — three different meanings", c:"core", w:3, items:[
+    ["Bias (bias–variance)","Systematic error from an over-simple model; the cause of underfitting."],
+    ["Bias term / bias unit / intercept","The additive constant b in wᵀx + b."],
+    ["Bias (data / fairness)","Systematic skew in the data or predictions, e.g. against a group."],
+  ], bottom:"Same word, three unrelated meanings — <b>always disambiguate by context.</b>",
+     see:["Bias–variance tradeoff","Underfitting"]},
+
+  {t:"Variance — two different meanings", c:"core", w:3, items:[
+    ["Variance (statistics)","The spread of a distribution, σ²."],
+    ["Variance (bias–variance)","How much the fitted model changes with the particular training sample; the cause of overfitting."],
+  ], bottom:"Related in spirit but not the same quantity.",
+     see:["Bias–variance tradeoff","Overfitting","Explained variance"]},
+
+  {t:"Loss · Cost · Objective · Error", c:"core", w:3, items:[
+    ["Loss function","The error on a <em>single</em> example (e.g. squared error for one point)."],
+    ["Cost function","The aggregate loss over a batch/dataset — usually the mean loss, sometimes plus a regularization term."],
+    ["Objective function","Whatever the optimizer optimizes (minimize or maximize); the most general term, usually the cost."],
+    ["Error","Informal: a residual, the irreducible noise, or a metric like “test error.” Pin it down by context."],
+  ], bottom:"In practice these are used interchangeably. The pedantic split is <b>per-example (loss) vs aggregate (cost) vs what-is-optimized (objective)</b>.",
+     see:["Loss function","Objective function","Noise"]},
+
+  {t:"Error · Residual · Loss", c:"eval", w:3, items:[
+    ["Residual","Observed minus predicted for one point (y − ŷ) — a real number you can plot."],
+    ["Loss","A function <em>of</em> the residual/prediction used for optimization (e.g. the squared residual)."],
+    ["Error","Overloaded: sometimes = residual, sometimes = irreducible noise, sometimes = a metric (“test error”)."],
+  ], bottom:"A <b>residual is a quantity; a loss is computed from it.</b> They are not the same thing.",
+     see:["Ordinary least squares","Mean squared error","Loss function"]},
+
+  {t:"Regression — task vs model vs phenomenon", c:"sup", w:3, items:[
+    ["Regression (task)","Predicting a <em>continuous</em> target."],
+    ["Logistic “regression”","A named model that does <em>classification</em> — the name is historical."],
+    ["Regression to the mean","A statistical phenomenon (extremes drift toward average) — unrelated."],
+  ], bottom:"<b>Logistic regression is classification.</b> Don't let the word “regression” mislead you.",
+     see:["Linear regression","Logistic regression"]},
+
+  {t:"Precision · Recall · Sensitivity · Specificity", c:"eval", w:3, items:[
+    ["Precision","Of the points predicted positive, the fraction actually positive: TP / (TP+FP)."],
+    ["Recall = Sensitivity = TPR","Of the actually-positive points, the fraction found: TP / (TP+FN)."],
+    ["Specificity = TNR","Of the actually-negative points, the fraction correctly rejected: TN / (TN+FP)."],
+  ], bottom:"<b>Recall and sensitivity are literally the same number</b> (ML vs medical naming). FPR = 1 − specificity.",
+     see:["Precision","Recall","Specificity","Confusion matrix"]},
+
+  {t:"Accuracy vs Precision", c:"eval", w:3, items:[
+    ["Accuracy","Overall fraction of correct predictions."],
+    ["Precision (ML)","Correctness among positive predictions only."],
+    ["Precision (measurement)","Reproducibility/consistency of a measurement — a different notion entirely."],
+  ], bottom:"Everyday speech treats them as synonyms; in ML they are <b>different metrics.</b>",
+     see:["Accuracy","Precision","Class imbalance"]},
+
+  {t:"L1 vs L2 (norm · penalty · loss)", c:"eval", w:3, items:[
+    ["L1 (Lasso / MAE)","Sum of |·|. As a penalty it drives coefficients to <em>exactly zero</em> (sparsity); as a loss it's MAE."],
+    ["L2 (Ridge / weight decay / MSE)","Sum of squares. As a penalty it shrinks coefficients <em>smoothly</em>; as a loss it's MSE."],
+  ], bottom:"<b>L1 → sparse/robust; L2 → smooth shrinkage.</b> Same idea appears as a norm, a regularizer, and a loss.",
+     see:["Lasso","Ridge regression","Regularization","Weight decay"]},
+
+  {t:"Parameter · Hyperparameter", c:"core", w:4, items:[
+    ["Parameter","A value <em>learned from data</em> during training: weights, coefficients, split thresholds, cluster centroids."],
+    ["Hyperparameter","A value <em>set before</em> training and not adjusted by the fit: learning rate, k in k-NN, max_depth, C, number of trees."],
+  ], bottom:"Rule of thumb: <b>if <code>.fit()</code> changes it, it's a parameter; if you pass it into the constructor, it's a hyperparameter.</b>",
+     see:["Parameter","Hyperparameter","Grid search"]},
+
+  {t:"Kernel — several meanings", c:"sup", w:4, items:[
+    ["Kernel (SVM)","A similarity function K(x,x′)=φ(x)·φ(x′) that enables the kernel trick."],
+    ["Kernel / filter (CNN)","The small weight window slid over an image in a convolution."],
+    ["Kernel (density / kernel PCA)","A weighting function around each point."],
+  ], bottom:"Three unrelated uses in this course alone (plus “GPU/OS kernel” outside it). <b>Context is everything.</b>",
+     see:["Kernel trick","RBF kernel","Convolution"]},
+
+  {t:"Bagging · Boosting · Stacking", c:"tree", w:5, items:[
+    ["Bagging","Train models in <em>parallel</em> on bootstrap resamples, then average/vote — reduces variance (e.g. Random Forest)."],
+    ["Boosting","Train models <em>sequentially</em>, each fixing the last's mistakes — reduces bias (e.g. XGBoost)."],
+    ["Stacking","Train a meta-model on the predictions of several base models."],
+  ], bottom:"<b>Parallel & variance-reducing (bagging) vs sequential & bias-reducing (boosting).</b>",
+     see:["Bagging","Boosting","Ensemble","Random forest"]},
+
+  {t:"Feature selection · Feature extraction · Dimensionality reduction", c:"unsup", w:7, items:[
+    ["Feature selection","Keep a <em>subset</em> of the original features."],
+    ["Feature extraction","Build <em>new</em> features from combinations of the originals (PCA, embeddings)."],
+    ["Dimensionality reduction","Umbrella for reducing the number of features; usually connotes extraction (PCA, t-SNE)."],
+  ], bottom:"Selection keeps originals; extraction creates new ones. Both reduce dimensionality.",
+     see:["Feature selection","Feature extraction","PCA","Curse of dimensionality"]},
+
+  {t:"Neural network · Feedforward network · MLP · Deep learning", c:"dl", w:8, items:[
+    ["Neural network","Umbrella term for any model of connected artificial neurons — includes MLPs, CNNs, RNNs, transformers."],
+    ["Feedforward network","Any neural net where signal flows one way, input → output, with no cycles. MLPs and CNNs are feedforward; RNNs are not."],
+    ["Multilayer perceptron (MLP)","A specific feedforward net made of fully-connected (dense) layers with non-linear activations."],
+    ["Deep learning","The subfield of ML using neural nets with many layers — a field, not a single model."],
+  ], bottom:"Strictly, <b>MLP ⊂ feedforward NN ⊂ neural network</b>. Intro courses often say “neural network” when they mean “MLP.” A CNN is a feedforward network but not an MLP.",
+     see:["Neural network","Multilayer perceptron","Deep learning"]},
+
+  {t:"Weights · Parameters · Coefficients", c:"dl", w:8, items:[
+    ["Parameters","General term for all learned values in a model."],
+    ["Weights","The multiplicative parameters (neural nets, linear models), usually excluding the bias/intercept."],
+    ["Coefficients","The weights of a linear/logistic model (the β's), read as effect sizes."],
+  ], bottom:"They overlap. The <b>bias / intercept is a parameter but not a “weight” or “coefficient.”</b>",
+     see:["Parameter","Neuron","Linear regression"]},
+
+  {t:"Epoch · Iteration · Batch · Step", c:"dl", w:8, items:[
+    ["Batch (mini-batch)","The group of examples processed together in one forward/backward pass."],
+    ["Iteration / Step","One parameter update — i.e. one batch."],
+    ["Epoch","One full pass over the entire training set = (dataset size ÷ batch size) iterations."],
+  ], bottom:"<b>1 epoch = many iterations; 1 iteration = 1 batch = 1 weight update.</b>",
+     see:["Batch","Epoch","Stochastic gradient descent"]},
+
+  {t:"Gradient descent vs Backpropagation", c:"dl", w:8, items:[
+    ["Backpropagation","The <em>algorithm that computes</em> the gradients (chain rule, backward through the network)."],
+    ["Gradient descent","The <em>optimizer that uses</em> those gradients to update the weights."],
+  ], bottom:"<b>Backprop computes the gradient; gradient descent (or Adam) takes the step.</b> Backprop isn't “learning” by itself.",
+     see:["Backpropagation","Gradient descent","Autograd"]},
+
+  {t:"Filter vs Kernel (CNN)", c:"dl", w:9, items:[
+    ["Kernel","The 2-D weight window for a single input channel."],
+    ["Filter","The full stack of kernels across all input channels that produces one output feature map."],
+  ], bottom:"Widely used as synonyms; the strict distinction only matters with multiple channels.",
+     see:["Convolution","Feature map","Convolutional neural network"]},
+];
+
+/* ── Render ─────────────────────────────────────────────────────────────── */
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const state={q:"",cats:new Set(Object.keys(CATS)),week:null,cum:false};
+
+// category chips
+const catsBox=document.getElementById("cats");
+Object.entries(CATS).forEach(([k,v])=>{
+  const b=document.createElement("button");
+  b.className="chip"; b.type="button"; b.style.setProperty("--c",v.color);
+  b.setAttribute("aria-pressed","true"); b.textContent=v.label;
+  b.addEventListener("click",()=>{ state.cats.has(k)?state.cats.delete(k):state.cats.add(k);
+    b.setAttribute("aria-pressed",state.cats.has(k)); render(); });
+  catsBox.appendChild(b);
+});
+
+// week chips: "All" clears the filter, W1…W10 are single-select
+// (clicking the active one also clears it).
+const weeksBox=document.getElementById("weeks");
+const wkBtns={};
+const allBtn=document.createElement("button");
+allBtn.className="wchip"; allBtn.type="button"; allBtn.textContent="All";
+allBtn.title="Show every week"; allBtn.setAttribute("aria-pressed","true");
+allBtn.addEventListener("click",()=>setWeek(null));
+weeksBox.appendChild(allBtn);
+Object.keys(WEEKS).map(Number).sort((a,b)=>a-b).forEach(w=>{
+  const b=document.createElement("button");
+  b.className="wchip"; b.type="button"; b.textContent="W"+w;
+  b.title="Week "+w+" — "+WEEKS[w];
+  b.setAttribute("aria-pressed","false");
+  b.addEventListener("click",()=>setWeek(state.week===w?null:w));
+  wkBtns[w]=b; weeksBox.appendChild(b);
+});
+const cumBox=document.getElementById("cum");
+const cumLabel=document.getElementById("cumLabel");
+cumBox.addEventListener("change",()=>{ state.cum=cumBox.checked; syncURL(); render(); });
+
+function setWeek(w){ state.week=w; syncURL(); render(); }
+
+// reset everything back to the default view
+const resetBtn=document.getElementById("reset");
+resetBtn.addEventListener("click",()=>{
+  state.q=""; qIn.value="";
+  state.cats=new Set(Object.keys(CATS));
+  catsBox.querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed","true"));
+  state.week=null; state.cum=false; cumBox.checked=false;
+  syncURL(); render();
+});
+
+// cards
+const confBox=document.getElementById("confusables");
+DISAMBIG.forEach((d,i)=>{
+  const el=document.createElement("article");
+  el.className="dis"; el.id=slug(d.t); el.dataset.cat=d.c; el.dataset.week=d.w||""; el.dataset.i=i;
+  el.style.borderLeftColor=CATS[d.c]?CATS[d.c].color:"#e3b341";
+  const see=(d.see||[]).map(s=>`<a href="glossary.html#${slug(s)}">${s}</a>`).join(", ");
+  el.innerHTML=`<div class="top">
+      <div class="tag">${CATS[d.c]?CATS[d.c].label:""}</div>
+      <div class="wk">${d.w?"Week "+d.w:""}</div>
+    </div>
+    <h3>${d.t}</h3>
+    <dl>${d.items.map(([n,x])=>`<dt>${n}</dt><dd>${x}</dd>`).join("")}</dl>
+    ${d.bottom?`<div class="bottom">${d.bottom}</div>`:""}
+    ${see?`<div class="see">→ in the glossary: ${see}</div>`:""}`;
+  confBox.appendChild(el);
+});
+
+const qIn=document.getElementById("q");
+qIn.addEventListener("input",()=>{ state.q=qIn.value.toLowerCase().trim(); render(); });
+
+function weekOK(w){
+  if(state.week===null) return true;
+  if(!w) return false;
+  return state.cum ? w<=state.week : w===state.week;
+}
+
+function render(){
+  let shown=0;
+  document.querySelectorAll(".dis").forEach(el=>{
+    const d=DISAMBIG[+el.dataset.i];
+    const text=(d.t+" "+d.items.map(x=>x.join(" ")).join(" ")+" "+(d.bottom||"")).toLowerCase();
+    const ok=state.cats.has(el.dataset.cat) && weekOK(d.w) &&
+             (state.q==="" || text.includes(state.q));
+    el.classList.toggle("hidden",!ok); if(ok)shown++;
+  });
+  // week chips: selected week is filled, weeks folded in by "include earlier
+  // weeks" get the quieter .incl treatment so it's obvious they're counted too
+  allBtn.setAttribute("aria-pressed",state.week===null);
+  Object.entries(wkBtns).forEach(([w,b])=>{
+    const n=+w, sel=state.week===n;
+    b.setAttribute("aria-pressed",sel);
+    b.classList.toggle("incl",!sel && state.cum && state.week!==null && n<state.week);
+  });
+  cumBox.disabled=state.week===null;
+  cumLabel.classList.toggle("off",state.week===null);
+  resetBtn.classList.toggle("on",
+    state.q!=="" || state.week!==null || state.cats.size!==Object.keys(CATS).length);
+  document.getElementById("empty").classList.toggle("hidden",shown>0);
+  document.getElementById("count").textContent=shown+" cluster"+(shown===1?"":"s");
+  document.getElementById("wknote").textContent =
+    state.week===null ? "" : (state.cum?"weeks 1–"+state.week:"week "+state.week)+" · "+WEEKS[state.week];
+}
+
+// ?week=5&cum=1 — lets a Canvas page link straight to one week's clusters
+function readURL(){
+  const p=new URLSearchParams(location.search);
+  const w=parseInt(p.get("week"),10);
+  if(WEEKS[w]) state.week=w;
+  state.cum=p.get("cum")==="1";
+  cumBox.checked=state.cum;
+}
+function syncURL(){
+  const p=new URLSearchParams(location.search);
+  state.week===null?p.delete("week"):p.set("week",state.week);
+  state.cum&&state.week!==null?p.set("cum","1"):p.delete("cum");
+  const qs=p.toString();
+  history.replaceState(null,"",location.pathname+(qs?"?"+qs:"")+location.hash);
+}
+
+readURL();
+render();
+</script>
+</body>
+</html>
