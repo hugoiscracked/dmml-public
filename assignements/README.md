@@ -6,7 +6,8 @@ and optional challenge work should all live there.
 
 ## Environment
 
-Use Python 3.10, 3.11, or 3.12. From the repository root:
+Use Python 3.11, 3.12, or 3.13 - the pinned versions of numpy, pandas and
+scikit-learn all require 3.11 or newer. From the repository root:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -16,6 +17,52 @@ Weeks 9 and 10 download datasets and pretrained models on first run. Students
 who want GPU-enabled PyTorch should install the matching `torch` and
 `torchvision` wheels from the official PyTorch instructions, then install the
 remaining requirements.
+
+## Working On An Assignment, And Getting Updates
+
+**Work in a copy, never in `template.ipynb`.** Before you start a week, duplicate
+its template:
+
+```bash
+cp assignements/w03_regression_classification/template.ipynb \
+   assignements/w03_regression_classification/submission.ipynb
+```
+
+Do your work in `submission.ipynb` and submit that file. `submission.ipynb` is
+gitignored, so it is yours alone and no course update can ever touch it.
+
+This matters because the templates are corrected during the semester. If your
+work lives in `template.ipynb`, every fix collides with it, and merging two
+versions of a Jupyter notebook by hand is genuinely unpleasant.
+
+### Pulling a correction
+
+With your work in `submission.ipynb`, taking an update is one command:
+
+```bash
+git pull
+```
+
+If you did already edit a `template.ipynb`, rescue it first, then take the
+update cleanly:
+
+```bash
+cp assignements/w01_eda/template.ipynb assignements/w01_eda/submission.ipynb
+git checkout -- assignements/w01_eda/template.ipynb
+git pull
+```
+
+Your work is now in `submission.ipynb`, and `template.ipynb` is the current
+course version again.
+
+### What a correction does and does not change
+
+The grader does **not** run the notebook you upload as-is. It takes the
+functions you wrote, drops them into the current reference template, and runs
+that. So the self-check cells that decide your grade always come from the
+up-to-date template, whichever copy you happen to have locally. Pulling a
+correction keeps what you read in step with what is graded; it is not the thing
+that makes the grade correct.
 
 ## Shared Material
 

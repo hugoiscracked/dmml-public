@@ -1,34 +1,45 @@
 # DMML notebook environment
 #
-# Recommended Python: 3.10, 3.11, or 3.12.
+# Python 3.11, 3.12 or 3.13. (3.10 is too old: pandas, numpy and scikit-learn
+# all require >=3.11 at these versions.)
+#
 # Install with:
 #   python -m pip install -r requirements.txt
 #
-# If you want GPU-enabled PyTorch, install torch/torchvision from the official
-# PyTorch selector for your CUDA version, then install the remaining packages.
+# Versions are PINNED, not floors. This is deliberate for a taught course:
+# everyone gets the same environment, the Gradescope autograder matches your
+# laptop, and a notebook that worked in September still works in December.
+# If you need to move a pin, change it here so the whole class moves together.
+#
+# For GPU PyTorch, install torch/torchvision from the official PyTorch selector
+# for your CUDA version first, then run this file.
+
 
 # Jupyter
-jupyterlab>=4.2
-notebook>=7.2
-ipykernel>=6.29
-ipywidgets>=8.1
+jupyterlab==4.5.6
+notebook==7.5.5
+ipykernel==7.2.0
+ipywidgets==8.1.8
 
 # Core scientific Python
-numpy>=1.26
-pandas>=2.2
-matplotlib>=3.8
-seaborn>=0.13
+numpy==2.4.2
+pandas==3.0.2
+matplotlib==3.10.8
+seaborn==0.13.2
 
 # Classical machine learning and statistics
-scikit-learn>=1.5
-statsmodels>=0.14
-shap>=0.45
+scikit-learn==1.8.0
+statsmodels==0.14.6
+shap==0.51.0
 
 # Neural networks and computer vision
-torch>=2.3
-torchvision>=0.18
+torch==2.12.0
+torchvision==0.27.0
 
 # HuggingFace datasets and transformers
-datasets>=2.20
-transformers>=4.42
-accelerate>=0.31
+datasets==4.8.5
+transformers==5.9.0
+accelerate==1.13.0
+
+# Running a notebook as a batch job on the cluster needs no extra package:
+# nbconvert ships with jupyterlab. See cluster/submit_notebook.slurm.

@@ -22,7 +22,7 @@ animations/w12_case_studies/media/
 #*.slurm
 
 # Downloaded datasets (regenerated on demand by the notebooks)
-exercices/**/data/
+assignements/**/data/
 data/
 datasets/
 cifar-10-batches-py/
@@ -46,4 +46,10 @@ cifar-10-batches-py/
 *-ubyte
 *-ubyte.gz
 # Student-generated benchmark results (created by the weekly save cells)
-exercices/common/benchmark_results.csv
+assignements/common/benchmark_results.csv
+
+# Transformer fine-tuning output dir (W10 Trainer)
+assignements/w10_sequences/w10_emotion_distilbert/
+
+# Student work: each week is done in a copy of its template
+assignements/*/submission.ipynb
